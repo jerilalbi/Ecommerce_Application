@@ -1,0 +1,84 @@
+﻿
+@{
+    Layout = null;
+}
+
+@{
+    ViewData["isCart"] = true;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Cart</title>
+    <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            background-color: #FFF7DD;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+            .hide-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+    </style>
+</head>
+<body>
+    @Html.Partial("_Header", ViewData);
+    <div class="p-3" style="margin-top: 70px">
+        <h3>My Cart</h3>
+        <div class="mt-3 d-flex">
+            <div class="hide-scrollbar" style="width: 60%; height: 500px; overflow-y: auto">
+                @for (int i = 0; i < 10; i++)
+                {
+                    @Html.Partial("_ProductTile")
+                }
+
+            </div>
+            <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+                <div class="rounded-4 d-flex justify-content-center align-items-center p-3" style="width: 60%; background-color: #91C4C3">
+                    <table style="border-collapse: separate; border-spacing: 10px 5px; width: 100%">
+                        <tr>
+                            <td>
+                                <h5>Cost: </h5>
+                            </td>
+                            <td>
+                                <h4>1750</h4>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h5>Delivery Charge: </h5>
+                            </td>
+                            <td>
+                                <h4>100</h4>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h5>Total: </h5>
+                            </td>
+                            <td>
+                                <h4>1850</h4>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>
+                                <button class="btn" type="submit" style="background-color: #FFF7DD; color: black !important ">Check Out</button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+</body>
+</html>

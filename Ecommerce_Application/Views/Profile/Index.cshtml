@@ -1,0 +1,46 @@
+﻿
+@{
+    Layout = null;
+}
+
+@{
+    ViewData["isProfile"] = true;
+}
+
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Profile</title>
+    <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            background-color: #FFF7DD;
+        }
+    </style>
+</head>
+<body>
+    @Html.Partial("_Header", ViewData);
+    <div class="w-100 p-3" style="background-color: #91C4C3; height: 250px; margin-top: 45px;">
+        <div class="h-100 ms-4 d-flex" style="width: 500px; ">
+            <img src="https://www.shutterstock.com/image-vector/universal-blank-profile-picture-avatar-600nw-1654275940.jpg" alt="Circular Image" class="rounded-circle" style="width: 200px; height: 200px;" />
+            <div class="d-flex flex-column justify-content-center p-3" style="width: 300px;">
+                <h2>Jeril</h2>
+                <h4>Jerilalbi@gmail.com</h4>
+            </div>
+        </div>
+    </div>
+    <div class="p-4">
+        <h3>Add Address:</h3>
+        <form>
+            <label>Address:</label>
+            <textarea class="form-control form-control-lg" rows="3" style="width: 500px;"></textarea>
+            <button class="btn mt-3" type="submit" style="background-color: #91C4C3 ">ADD</button>
+        </form>
+    </div>
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+</body>
+</html>

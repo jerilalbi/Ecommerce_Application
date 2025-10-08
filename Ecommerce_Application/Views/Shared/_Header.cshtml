@@ -1,5 +1,13 @@
-﻿<header>
-    <nav class="navbar navbar-expand-lg" style="background-color: #80A1BA; font-size: 18px; font-weight: 500;">
+﻿
+@{
+    var isCartValue = ViewData["isCart"];
+    var isProfileValue = ViewData["isProfile"];
+    bool isCart = (isCartValue is bool) ? (bool)isCartValue : false;
+    bool isProfile = (isProfileValue is bool) ? (bool)isProfileValue : false;
+}
+
+<header style="position: fixed; top: 0; width: 100%; z-index: 100">
+    <nav class="navbar navbar-expand-lg" style="background-color: #80A1BA; font-size: 18px; height: 70px; font-weight: 500;">
         <div class="container-fluid">
             <a class="navbar-brand text-light" href="#">ClickBuy</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,12 +35,23 @@
                     <button class="btn" type="submit" style="background-color: #FFF7DD; color: black !important ">Search</button>
                 </form>
                 <form class="d-flex ms-5">
-                    <button class="btn me-2" type="submit">
-                        <i class="fa-solid fa-cart-shopping" style="font-size: 20px; color: white"></i>
-                    </button>
-                    <button class="btn" type="submit">
-                        <i class="fa-solid fa-user" style="font-size: 20px; color: white"></i>
-                    </button>
+                    @if (!isCart)
+                    {
+                        <button class="btn me-2" type="submit">
+                            <i class="fa-solid fa-cart-shopping" style="font-size: 20px; color: white"></i>
+                        </button>
+                    }
+                    @if (isProfile)
+                    {
+                        <button class="btn" type="submit" style="background-color: #91C4C3 ">Log Out</button>
+                    }
+                    else
+                    {
+                        <button class="btn" type="submit">
+                            <i class="fa-solid fa-user" style="font-size: 20px; color: white"></i>
+                        </button>
+                    }
+
                 </form>
             </div>
         </div>

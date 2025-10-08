@@ -6,14 +6,10 @@ using System.Web.Mvc;
 
 namespace Ecommerce_Application.Controllers
 {
-    public class ProductController : Controller
+    public class CartController : Controller
     {
-        public ActionResult Category()
+        public ActionResult Index()
         {
-            return View();
-        }
-
-        public ActionResult Details() { 
             return View();
         }
     }
