@@ -1,0 +1,43 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .active {
+            background-color: #91C4C3;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <div class="sidebar d-flex flex-column pt-4 vh-100 text-center" style="background-color: #80A1BA">
+            <h4 class="text-center mb-4 text-white ps-2 pe-2">Admin Dashboard</h4>
+
+            <a href="#" class="nav-link admin-btn p-3 mb-2 active" data-url="/Admin/Dashboard" style="font-weight: 500">Sales</a>
+            <a href="#" class="nav-link admin-btn p-3 mb-2" data-url="/Admin/AddProduct" style="font-weight: 500">Add Product</a>
+            <a href="#" class="nav-link admin-btn p-3 mb-2" data-url="/Admin/Users" style="font-weight: 500">Users</a>
+            <a href="/User/Login" class="nav-link p-3 mb-2" style="font-weight: 500">Log Out</a>
+        </div>
+        <div class="main-content flex-grow-1" style="min-height: 100vh;">
+            <div id="contentHolder">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+
+    <script src="~/Scripts/jquery-3.7.0.min.js"></script>
+    <script src="~/Scripts/App/Dashboard.js"></script>
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+</body>
+</html>
