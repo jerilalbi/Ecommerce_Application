@@ -33,14 +33,52 @@ namespace Ecommerce_API.Controllers
         public IHttpActionResult Login([FromBody]LoginModel login)
         {
             UserDAL userDAL = new UserDAL();
-            string token = userDAL.LoginUser(login);
-            if(!String.IsNullOrEmpty(token))
+            UserModel user = userDAL.LoginUser(login);
+            if(user != null)
             {
-                return Ok(new { success = true, token = token });
+                return Ok(new { success = true, user });
             }
             else
             {
                 return BadRequest("Invalid Credentials");
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("userDetails")]
+        public IHttpActionResult UserDetails([FromBody] UserModel userModel)
+        {
+            UserDAL userDAL = new UserDAL();
+            UserModel user = userDAL.getUserDetails(userModel);
+
+            if (user != null) { 
+                return Ok(new { success = true, user });
+            }
+            else
+            {
+                var response = Request.CreateResponse(
+                    HttpStatusCode.NotFound, new { message = "User not found." }
+                );
+                return ResponseMessage(response);
+            }
+        }
+
+        [Authorize]
+        [HttpPut]
+        [Route("updateAddress")]
+        public IHttpActionResult UpdateAddress([FromBody] UserModel userModel)
+        {
+            UserDAL user = new UserDAL();
+            int result = user.updateUserAddress(userModel);
+
+            if(result != 0)
+            {
+                return Ok(new {success = true, message = "User Address Updated"});
+            }
+            else
+            {
+                return BadRequest("User Not Updated");
             }
         }
     }

@@ -10,7 +10,7 @@ using System.Web.Http;
 namespace Ecommerce_API.Controllers
 {
     [Authorize]
-    [RoutePrefix("api/product")]
+    [RoutePrefix("api/products")]
     public class ProductController : ApiController
     {
         [HttpGet]
@@ -35,13 +35,51 @@ namespace Ecommerce_API.Controllers
         {
             ProductDAL productDAL = new ProductDAL();
             List<string> categories = productDAL.getAllCategories();
-            if(categories != null && categories.Count > 0)
+            if (categories != null && categories.Count > 0)
             {
                 return Ok(categories);
             }
             else
             {
                 return BadRequest("Error in getting categories");
+            }
+        }
+
+        [HttpGet]
+        [Route("category/{category}")]
+        public IHttpActionResult GetProductsCategory(string category)
+        {
+            ProductDAL productDAL = new ProductDAL();
+            List<ProductModel> products = productDAL.getProductByCategory(category);
+            if (products.Count > 0)
+            {
+                return Ok(products);
+            }
+            else
+            {
+                var response = Request.CreateResponse(
+                    HttpStatusCode.NotFound, new { message = "Product not found." }
+                );
+                return ResponseMessage(response);
+            }
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        public IHttpActionResult GetProductsId(int id)
+        {
+            ProductDAL productDAL = new ProductDAL();
+            ProductModel products = productDAL.getProductByID(id);
+            if (products !=  null)
+            {
+                return Ok(products);
+            }
+            else
+            {
+                var response = Request.CreateResponse(
+                    HttpStatusCode.NotFound, new { message = "Product not found." }
+                );
+                return ResponseMessage(response);
             }
         }
     }

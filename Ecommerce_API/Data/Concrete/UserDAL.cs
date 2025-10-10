@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Web;
+using System.Web.UI.WebControls;
 
 namespace Ecommerce_API.Data.Concrete
 {
@@ -37,11 +38,12 @@ namespace Ecommerce_API.Data.Concrete
             }
             catch (Exception ex)
             {
+                Logger.log(ex);
                 throw ex;
             }
         }
 
-        public string LoginUser(LoginModel login)
+        public UserModel LoginUser(LoginModel login)
         {
             try
             {
@@ -56,8 +58,11 @@ namespace Ecommerce_API.Data.Concrete
                     if (reader.HasRows)
                     {
                         reader.Read();
+                        int userId = Convert.ToInt32(reader["User_ID"]);
                         string name = Convert.ToString(reader["name"]);
                         string email = Convert.ToString(reader["email"]);
+                        string address = Convert.ToString(reader["address"]);
+                        string phone = Convert.ToString(reader["phone"]);
                         string role = Convert.ToString(reader["role"]);
                         string passwordHash = Convert.ToString(reader["PasswordHash"]);
                         string passwordSalt = Convert.ToString(reader["PasswordSalt"]);
@@ -66,16 +71,23 @@ namespace Ecommerce_API.Data.Concrete
 
                         if (isPasswordMatch)
                         {
-                            return jWTHelper.GenerateToken(name, email, role);
+                            return new UserModel { 
+                                Token = jWTHelper.GenerateToken(name, email, role),
+                                UserId = userId,
+                                Name = name,
+                                Email = email,
+                                Address = address,
+                                Phone = phone,
+                            };
                         }
                         else
                         {
-                            return "";
+                            return null;
                         }
                     }
                     else
                     {
-                        return "";
+                        return null;
                     }
                 },
                 new SqlParameter("@email", login.email)
@@ -83,6 +95,67 @@ namespace Ecommerce_API.Data.Concrete
             }
             catch (Exception ex)
             {
+                Logger.log(ex);
+                throw ex;
+            }
+        }
+
+        public UserModel getUserDetails(UserModel user)
+        {
+            try
+            {
+                string storedProcedure = "UserDetails";
+
+                return ExecuteSQL(storedProcedure, cmd =>
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        reader.Read();
+                        string address = Convert.ToString(reader["address"]);
+                        string phone = Convert.ToString(reader["phone"]);
+
+                            return new UserModel
+                            {
+                                UserId = user.UserId,
+                                Name = user.Name,
+                                Email = user.Email,
+                                Address = address,
+                                Phone = phone,
+                            };
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                },
+                new SqlParameter("@userId", user.UserId)
+                );
+            }
+            catch (Exception ex)
+            {
+                Logger.log(ex);
+                throw ex;
+            }
+        }
+
+        public int updateUserAddress(UserModel user)
+        {
+            try
+            {
+                string storedProcedure = "UpdateAddress";
+                return ExecuteSQL(storedProcedure, cmd =>
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    return cmd.ExecuteNonQuery();
+                },
+                new SqlParameter("@userId", user.UserId),
+                new SqlParameter("@address",user.Address)
+                );
+            }catch(Exception ex)
+            {
+                Logger.log(ex);
                 throw ex;
             }
         }

@@ -11,5 +11,6 @@ namespace Ecommerce_API.Models
         public string ProductName { get; set; }
         public int price { get; set; }
         public string imgUrl { get; set; }
+        public int quantity { get; set; }
     }
 }
