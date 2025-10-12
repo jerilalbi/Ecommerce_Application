@@ -82,5 +82,22 @@ namespace Ecommerce_API.Controllers
                 return ResponseMessage(response);
             }
         }
+
+        [HttpGet]
+        [Route("search")]
+        public IHttpActionResult SearchProduct(string search)
+        {
+            ProductDAL productDAL = new ProductDAL();
+            List<ProductModel> products = productDAL.searchProduct(search);
+
+            if (products != null)
+            {
+                return Ok(new { success = true, products = products });
+            }
+            else
+            {
+                return BadRequest("Error in searching");
+            }
+        }
     }
 }

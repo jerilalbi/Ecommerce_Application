@@ -9,6 +9,7 @@ namespace Ecommerce_API.Models
     {
         public int ProductId { get; set; }
         public string ProductName { get; set; }
+        public string ProductCategory { get; set; }
         public int price { get; set; }
         public string imgUrl { get; set; }
         public int quantity { get; set; }

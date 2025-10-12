@@ -121,25 +121,5 @@ namespace Ecommerce_API.Data.Concrete
                 throw ex;
             }
         }
-
-        public int clearCart(CartModel cart)
-        {
-            try
-            {
-                string storedProcedure = "ClearCart";
-                return ExecuteSQL(storedProcedure, cmd =>
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    return cmd.ExecuteNonQuery();
-                },
-                new SqlParameter("@customerID", cart.CustomerID)
-                );
-            }
-            catch (Exception ex)
-            {
-                Logger.log(ex);
-                throw ex;
-            }
-        }
     }
 }

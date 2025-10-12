@@ -6,6 +6,9 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
+using System.Security.Principal;
+using System.Threading;
 using System.Web;
 using System.Web.UI.WebControls;
 
@@ -154,6 +157,37 @@ namespace Ecommerce_API.Data.Concrete
                 new SqlParameter("@address",user.Address)
                 );
             }catch(Exception ex)
+            {
+                Logger.log(ex);
+                throw ex;
+            }
+        }
+
+        public int deleteAccount(UserModel userModel)
+        {
+            try
+            {
+                string storedProcedure = "DeleteUser";
+                IPrincipal user = Thread.CurrentPrincipal;
+                var identity = user.Identity as ClaimsIdentity;
+                string email = identity.FindFirst(ClaimTypes.Email).Value;
+
+                if (userModel.Email == email)
+                {
+                    return ExecuteSQL(storedProcedure, cmd =>
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        return cmd.ExecuteNonQuery();
+                    },
+                    new SqlParameter("@email", userModel.Email)
+                    );
+                }
+                else
+                {
+                    return 0;
+                }  
+            }
+            catch (Exception ex)
             {
                 Logger.log(ex);
                 throw ex;

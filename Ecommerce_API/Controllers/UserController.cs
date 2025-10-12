@@ -81,5 +81,21 @@ namespace Ecommerce_API.Controllers
                 return BadRequest("User Not Updated");
             }
         }
+
+        [Authorize]
+        [HttpDelete]
+        [Route("deleteAccount")]
+        public IHttpActionResult DeleteAccount([FromBody] UserModel userModel) {
+            UserDAL userDAL = new UserDAL();
+            int result = userDAL.deleteAccount(userModel);
+
+            if (result != 0) {
+                return Ok(new { success = true, message = "Account Deleted" });
+            }
+            else
+            {
+                return BadRequest("Account not deleted");
+            }
+        }
     }
 }

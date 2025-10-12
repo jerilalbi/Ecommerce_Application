@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Web;
+using System.Web.Http;
 
 namespace Ecommerce_API.Data.Concrete
 {
@@ -136,6 +137,38 @@ namespace Ecommerce_API.Data.Concrete
             catch (Exception ex) {
                 Logger.log(ex);
                 throw ex; 
+            }
+        }
+
+        public List<ProductModel> searchProduct(string search)
+        {
+            try
+            {
+                string storedProcedure = "SearchProduct";
+                List<ProductModel> products = new List<ProductModel>();
+
+                return ExecuteSQL(storedProcedure, cmd =>
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    using (SqlDataReader reader = cmd.ExecuteReader()) {
+                        while (reader.Read()) {
+                            products.Add(new ProductModel { 
+                                ProductId = Convert.ToInt32(reader["product_id"]),
+                                ProductName = Convert.ToString(reader["product_name"]),
+                                price = Convert.ToInt32(reader["price"]),
+                                imgUrl = Convert.ToString(reader["img"]),
+                                quantity = Convert.ToInt32(reader["quantity"])
+                            });
+                        }
+                    }
+                    return products;
+                }, 
+                new SqlParameter("@searchTerm", search)
+                );
+            }
+            catch (Exception ex) { 
+                Logger.log(ex);
+                throw ex;
             }
         }
     }

@@ -22,7 +22,14 @@ namespace Ecommerce_API.Controllers
 
             List<CartModel> cartItems = cart.getCartItems(customerId);
 
-            return Ok(new { success = true, cartItems });
+            if(cartItems != null)
+            {
+                return Ok(new { success = true, cartItems });
+            }
+            else
+            {
+                return BadRequest("Error in getting cart items");
+            }   
         }
 
         [HttpPost]
@@ -71,23 +78,6 @@ namespace Ecommerce_API.Controllers
             else
             {
                 return BadRequest("Item not removed!");
-            }
-        }
-
-        [HttpDelete]
-        [Route("clear")]
-        public IHttpActionResult clearCart([FromBody] CartModel cart)
-        {
-            CartDAL cartDal = new CartDAL();
-            int result = cartDal.clearCart(cart);
-
-            if (result != 0)
-            {
-                return Ok(new { success = true, message = "Cart Cleared" });
-            }
-            else
-            {
-                return BadRequest("Cart not cleared!");
             }
         }
     }
