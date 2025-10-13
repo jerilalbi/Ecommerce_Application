@@ -1,4 +1,4 @@
-﻿
+﻿@model List<string>
 @{
     var isCartValue = ViewData["isCart"];
     var isProfileValue = ViewData["isProfile"];
@@ -9,37 +9,47 @@
 <header style="position: fixed; top: 0; width: 100%; z-index: 100">
     <nav class="navbar navbar-expand-lg" style="background-color: #80A1BA; font-size: 18px; height: 70px; font-weight: 500;">
         <div class="container-fluid">
-            <a class="navbar-brand text-light" href="#">ClickBuy</a>
+            <a class="navbar-brand text-light" href="@Url.Action("Index","Home")">ClickBuy</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active text-light" aria-current="page" href="#">Home</a>
+                        <a class="nav-link active text-light" aria-current="page" href="@Url.Action("Index","Home")">Home</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link text-light active dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Category
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="#">Action</a></li>
-                            <li><a class="dropdown-item" href="#">Another action</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            @if (Model != null && Model.Any())
+                            {
+                                foreach (var category in Model)
+                                {
+                                    <li><a class="dropdown-item" href="@Url.Action("Category","Product", new {id = category})">@category</a></li>
+                                }
+                            }
+                            else
+                            {
+                                <li><span class="dropdown-item">No categories found</span></li>
+                            }
                         </ul>
                     </li>
                 </ul>
-                <form class="d-flex">
-                    <input class="form-control me-2" type="search" placeholder="Search Products" aria-label="Search">
-                    <button class="btn" type="submit" style="background-color: #FFF7DD; color: black !important ">Search</button>
-                </form>
-                <form class="d-flex ms-5">
+                <div>
+                    <form id="searchForm" class="d-flex" onsubmit="return false;">
+                        <input id="searchInput" class="form-control me-2" type="search" placeholder="Search Products" aria-label="Search">
+                        <button id="searchButton" class="btn" type="submit" style="background-color: #FFF7DD; color: black !important ">Search</button>
+                    </form>
+                    <div id="searchSuggestions" class="list-group mt-1" style="position:absolute; z-index:1000; width:210px;"></div>
+                </div>
+                <form class="d-flex ms-5 align-items-center">
                     @if (!isCart)
                     {
-                        <button class="btn me-2" type="submit">
+                        <a class="d-block text-decoration-none" href="@Url.Action("Index","Cart")">
                             <i class="fa-solid fa-cart-shopping" style="font-size: 20px; color: white"></i>
-                        </button>
+                        </a>
                     }
                     @if (isProfile)
                     {
@@ -57,3 +67,51 @@
         </div>
     </nav>
 </header>
+
+<script src="~/Scripts/jquery-3.7.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+
+        function showSuggestions(products) {
+            let container = $("#searchSuggestions");
+            container.empty();
+
+            if (products.length === 0) {
+                container.hide();
+                return;
+            }
+
+            products.forEach(function (p) {
+                let item = $('<a style="cursor: pointer;" class="list-group-item list-group-item-action text-dark"></a>');
+                item.text(p.ProductName);
+                item.click(function () {
+                    let productId = p.ProductId;
+                    window.location.href = "/Product/Details/" + productId;
+                    container.hide();
+                });
+                container.append(item);
+            });
+
+            container.show();
+        }
+
+        $("#searchButton").click(function () {
+            let query = $("#searchInput").val().trim();
+            if (!query) {
+                $("#searchSuggestions").hide();
+                return;
+            }
+
+            $.getJSON("/Product/SeachProduct", { query: query }, function (data) {
+                showSuggestions(data);
+            });
+        });
+
+        $(document).click(function (e) {
+            if (!$(e.target).closest("#searchForm, #searchSuggestions").length) {
+                $("#searchSuggestions").hide();
+            }
+        });
+    });
+</script>
+

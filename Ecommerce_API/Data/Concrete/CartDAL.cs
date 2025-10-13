@@ -26,9 +26,12 @@ namespace Ecommerce_API.Data.Concrete
                         {
                             carts.Add(new CartModel
                             {
+                                CartItemId = Convert.ToInt32(reader["cart_id"]),
                                 CustomerID = Convert.ToInt32(reader["customer_id"]),
                                 ProductID = Convert.ToInt32(reader["product_id"]),
                                 Quantity = Convert.ToInt32(reader["quantity"]),
+                                ProductName = Convert.ToString(reader["product_name"]),
+                                ProductImg = Convert.ToString(reader["img"]),
                                 Price = Convert.ToInt32(reader["price"]),
                                 SubTotal = Convert.ToInt32(reader["sub_total"])
                             });
@@ -101,7 +104,7 @@ namespace Ecommerce_API.Data.Concrete
             }
         }
 
-        public int deleteItemCart(CartModel cart)
+        public int deleteItemCart(int id)
         {
             try
             {
@@ -111,8 +114,7 @@ namespace Ecommerce_API.Data.Concrete
                     cmd.CommandType = CommandType.StoredProcedure;
                     return cmd.ExecuteNonQuery();
                 },
-                new SqlParameter("@customerID", cart.CustomerID),
-                new SqlParameter("@productID", cart.ProductID)
+                new SqlParameter("@cartItemID", id)
                 );
             }
             catch (Exception ex)

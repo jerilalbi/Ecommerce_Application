@@ -25,8 +25,8 @@
                             <div class="col-md-6 col-lg-7 d-flex align-items-center">
                                 <div class="card-body p-4 p-lg-5 text-black">
 
-                                    <form>
-
+                                    @using (Html.BeginForm("Login", "User", FormMethod.Post))
+                                    {
                                         <div class="d-flex align-items-center mb-3 pb-1">
                                             <span class="h1 fw-bold mb-0">ClickBuy</span>
                                         </div>
@@ -34,23 +34,25 @@
                                         <h5 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">Sign into your account</h5>
 
                                         <div data-mdb-input-init class="form-outline mb-4">
-                                            <input type="email" id="form2Example17" class="form-control form-control-lg" />
-                                            <label class="form-label" for="form2Example17">Email address</label>
+                                            @Html.TextBoxFor(m => m.email, new { @class = "form-control form-control-lg", type = "email" })
+                                            <label class="form-label" for="form2Example17">Email</label>
+                                            @Html.ValidationMessageFor(m => m.email, "", new { @style = "color: red;" })
                                         </div>
 
                                         <div data-mdb-input-init class="form-outline mb-4">
-                                            <input type="password" id="form2Example27" class="form-control form-control-lg" />
+                                            @Html.TextBoxFor(m => m.password, new { @class = "form-control form-control-lg", type = "password" })
                                             <label class="form-label" for="form2Example27">Password</label>
+                                            @Html.ValidationMessageFor(m => m.password, "", new { @style = "color: red;" })
                                         </div>
 
                                         <div class="pt-1 mb-4">
-                                            <button data-mdb-button-init data-mdb-ripple-init class="btn btn-dark btn-lg btn-block" type="button">Login</button>
+                                            <button data-mdb-button-init data-mdb-ripple-init class="btn btn-dark btn-lg btn-block" type="submit">Login</button>
                                         </div>
 
-                                        <p class="mb-5 pb-lg-2" style="color: #393f81;">
-                                            Don't have an account? @Html.ActionLink("Register Now","Register","User", null, new {@style = "color: #393f81" })
-                                        </p>
-                                    </form>
+                                    }
+                                    <p class="mb-5 pb-lg-2" style="color: #393f81;">
+                                        Don't have an account? @Html.ActionLink("Register Now", "Register", "User", null, new { @style = "color: #393f81" })
+                                    </p>
 
                                 </div>
                             </div>
@@ -60,6 +62,20 @@
             </div>
         </div>
     </section>
+    @if (ViewBag.result != null)
+    {
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div class="toast show bg-danger text-white">
+                <div class="toast-header">
+                    <strong class="me-auto">Login Failed</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">
+                    Invalid User Credentials
+                </div>
+            </div>
+        </div>
+    }
     <script src="~/Scripts/bootstrap.bundle.min.js"></script>
 </body>
 </html>

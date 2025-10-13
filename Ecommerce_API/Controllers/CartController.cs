@@ -66,10 +66,10 @@ namespace Ecommerce_API.Controllers
         }
 
         [HttpDelete]
-        [Route("remove")]
-        public IHttpActionResult removeProduct([FromBody] CartModel product) { 
+        [Route("remove/{id}")]
+        public IHttpActionResult removeProduct(int id) { 
             CartDAL cartDal = new CartDAL();
-            int result = cartDal.deleteItemCart(product);
+            int result = cartDal.deleteItemCart(id);
 
             if (result != 0)
             {

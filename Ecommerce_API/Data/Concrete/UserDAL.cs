@@ -81,6 +81,7 @@ namespace Ecommerce_API.Data.Concrete
                                 Email = email,
                                 Address = address,
                                 Phone = phone,
+                                Role = role,
                             };
                         }
                         else

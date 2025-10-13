@@ -9,9 +9,10 @@ namespace Ecommerce_Application.Models
     public class LoginModel
     {
         [Required(ErrorMessage = "Email is Required")]
-        public string Email { get; set; }
+        public string email { get; set; }
 
         [Required(ErrorMessage = "Password is Required")]
-        public string Password { get; set; }
+
+        public string password { get; set; }
     }
 }

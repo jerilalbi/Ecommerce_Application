@@ -1,4 +1,4 @@
-﻿
+﻿@model Ecommerce_Application.Models.RegisterModel
 
 @{
     ViewBag.Title = "Register";
@@ -39,71 +39,77 @@
                                 </div>
                             </div>
                             <div class="col-xl-6">
-                                <div class="card-body p-md-3 text-black">
-                                    <h3 class="mb-5 text-uppercase">Register New Account</h3>
+                                @using (Html.BeginForm("Register", "User", FormMethod.Post))
+                                {
+                                    <div class="card-body p-md-3 text-black">
+                                        <h3 class="mb-5 text-uppercase">Register New Account</h3>
 
-                                    <div class="row">
-                                        <div class="col-md-6 mb-4">
-                                            <div data-mdb-input-init class="form-outline">
-                                                <input type="text" id="form3Example1m" class="form-control form-control-lg" />
-                                                <label class="form-label" for="form3Example1m">Name</label>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-4">
+                                                <div data-mdb-input-init class="form-outline">
+                                                    @Html.TextBoxFor(m => m.Name, new { @class = "form-control form-control-lg" })
+                                                    <label class="form-label" for="form3Example1m">Name</label>
+                                                    @Html.ValidationMessageFor(m => m.Name, "", new { @style = "color: red;" })
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-4">
+                                                <div data-mdb-input-init class="form-outline">
+                                                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control form-control-lg", type = "email" })
+                                                    <label class="form-label" for="form3Example1n">Email</label>
+                                                    @Html.ValidationMessageFor(m => m.Email, "", new { @style = "color: red;" })
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-6 mb-4">
-                                            <div data-mdb-input-init class="form-outline">
-                                                <input type="email" id="form3Example1n" class="form-control form-control-lg" />
-                                                <label class="form-label" for="form3Example1n">Email</label>
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-4">
+                                                <div data-mdb-input-init class="form-outline">
+                                                    @Html.PasswordFor(m => m.Password, new { @class = "form-control form-control-lg" })
+                                                    <label class="form-label" for="form3Example1m1">Password</label>
+                                                    @Html.ValidationMessageFor(m => m.Password, "", new { @style = "color: red;" })
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <div data-mdb-input-init class="form-outline">
+                                                    @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control form-control-lg" })
+                                                    <label class="form-label" for="form3Example1n1">Confirm Password</label>
+                                                    @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @style = "color: red;" })
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div class="row">
-                                        <div class="col-md-6 mb-4">
-                                            <div data-mdb-input-init class="form-outline">
-                                                <input type="password" id="form3Example1m1" class="form-control form-control-lg" />
-                                                <label class="form-label" for="form3Example1m1">Password</label>
+                                        <div class="d-md-flex justify-content-start align-items-center mb-3 py-2">
+
+                                            <h6 class="mb-0 me-4">Gender: </h6>
+                                            @Html.ValidationMessageFor(m => m.Gender, "", new { @style = "color: red;" })
+
+                                            <div class="form-check form-check-inline mb-0 me-4">
+                                                <label class="form-check-label" for="femaleGender"> @Html.RadioButtonFor(m => m.Gender, "Female") Female</label>
+                                            </div>
+
+                                            <div class="form-check form-check-inline mb-0 me-4">
+                                                <label class="form-check-label" for="maleGender"> @Html.RadioButtonFor(m => m.Gender, "Male") Male</label>
                                             </div>
                                         </div>
-                                        <div class="col-md-6 mb-3">
-                                            <div data-mdb-input-init class="form-outline">
-                                                <input type="password" id="form3Example1n1" class="form-control form-control-lg" />
-                                                <label class="form-label" for="form3Example1n1">Confirm Password</label>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div class="d-md-flex justify-content-start align-items-center mb-3 py-2">
-
-                                        <h6 class="mb-0 me-4">Gender: </h6>
-
-                                        <div class="form-check form-check-inline mb-0 me-4">
-                                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="femaleGender"
-                                                   value="female" />
-                                            <label class="form-check-label" for="femaleGender">Female</label>
+                                        <div data-mdb-input-init class="form-outline mb-3">
+                                            @Html.TextBoxFor(m => m.Dob, new { @class = "form-control form-control-lg", type = "date", max = @ViewBag.MaxDate })
+                                            <label class="form-label" for="form3Example9">Date Of Birth</label>
+                                            @Html.ValidationMessageFor(m => m.Dob, "", new { @style = "color: red;" })
                                         </div>
 
-                                        <div class="form-check form-check-inline mb-0 me-4">
-                                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="maleGender"
-                                                   value="male" />
-                                            <label class="form-check-label" for="maleGender">Male</label>
+                                        <div data-mdb-input-init class="form-outline mb-3">
+                                            @Html.TextBoxFor(m => m.Phone, new { @class = "form-control form-control-lg", type = "text" })
+                                            <label class="form-label" for="form3Example90">Phone Number</label>
+                                            @Html.ValidationMessageFor(m => m.Phone, "", new { @style = "color: red;" })
+                                        </div>
+
+                                        <div class="d-flex justify-content-end pt-2">
+                                            <button type="submit" name="action" value="login" class="btn btn-light btn-lg">Back To Login</button>
+                                            <button type="submit" name="action" value="register" class="btn btn-lg ms-2" style="background-color: #80A1BA; color: white; font-weight: bold">Register</button>
                                         </div>
                                     </div>
-
-                                    <div data-mdb-input-init class="form-outline mb-3">
-                                        <input type="date" max="@ViewBag.MaxDate" id="form3Example9" class="form-control form-control-lg" />
-                                        <label class="form-label" for="form3Example9">Date Of Birth</label>
-                                    </div>
-
-                                    <div data-mdb-input-init class="form-outline mb-3">
-                                        <input type="number" id="form3Example90" class="form-control form-control-lg" />
-                                        <label class="form-label" for="form3Example90">Phone Number</label>
-                                    </div>
-
-                                    <div class="d-flex justify-content-end pt-2">
-                                        <button type="button" class="btn btn-light btn-lg">Back To Login</button>
-                                        <button type="button" class="btn btn-lg ms-2" style="background-color: #80A1BA; color: white; font-weight: bold">Register</button>
-                                    </div>
-                                </div>
+                                }
                             </div>
                         </div>
                     </div>
@@ -111,6 +117,24 @@
             </div>
         </div>
     </section>
+
+    @if (ViewBag.UserRegistered != null)
+    {
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div class="toast show bg-@(ViewBag.UserRegistered == "success" ? "success" : "danger") text-white">
+                <div class="toast-header">
+                    <strong class="me-auto">@(ViewBag.UserRegistered?.ToString().ToUpper())</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">
+                    @ViewBag.Message
+                </div>
+            </div>
+        </div>
+    }
+
     <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
 </body>
 </html>

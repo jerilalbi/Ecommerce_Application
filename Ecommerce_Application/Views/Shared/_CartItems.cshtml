@@ -1,0 +1,50 @@
+﻿@model List<Ecommerce_Application.Models.CartModel>
+
+@if (Model != null && Model.Any())
+{
+    foreach (var item in Model)
+    {
+        <div class="w-100 rounded-4 d-flex mb-2 pe-2" style="height: 150px; background-color: white">
+            <img src=@item.ProductImg class="img-fluid" style="height: 150px; width: 150px; border-start-start-radius: 1rem; border-end-start-radius: 1rem" />
+            <table class="ms-3">
+                <tr>
+                    <td>
+                        <h5>@item.ProductName</h5>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <h6>₹ @item.SubTotal</h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="d-flex justify-content-evenly" style="width: 120px;height: 40px; color: white; font-size: 20px; font-weight: 600">
+                            <div class="d-flex justify-content-center align-items-center" style="width: 30px; font-size: 23px; height: 40px; background-color: #80A1BA; cursor: pointer">
+                                -
+                            </div>
+                            <div class="d-flex justify-content-center align-items-center" style="width: 30px; height: 40px; background-color: #80A1BA">
+                                @item.Quantity
+                            </div>
+                            <div class="d-flex justify-content-center align-items-center" style="width: 30px; height: 40px; background-color: #80A1BA; cursor: pointer ">
+                                +
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <div class="d-flex justify-content-center align-items-center ms-auto" style="cursor: pointer">
+                    <button type="button" onclick="deleteCartItem(@item.CartItemId)" class="btn btn-link p-0">
+                        <i class="fa-solid fa-trash" style="color: red; font-size: 30px"></i>
+                    </button>
+            </div>
+        </div>
+    }
+}
+<script>
+    function deleteCartItem(cartItemId) {
+        $.post('/Cart/DeleteItem', { id: cartItemId }, function (html) {
+            $('#cartContainer').html(html);
+        });
+    }
+</script>
