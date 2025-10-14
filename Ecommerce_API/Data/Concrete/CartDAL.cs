@@ -33,7 +33,8 @@ namespace Ecommerce_API.Data.Concrete
                                 ProductName = Convert.ToString(reader["product_name"]),
                                 ProductImg = Convert.ToString(reader["img"]),
                                 Price = Convert.ToInt32(reader["price"]),
-                                SubTotal = Convert.ToInt32(reader["sub_total"])
+                                SubTotal = Convert.ToInt32(reader["sub_total"]),
+                                MaxStock = Convert.ToInt32(reader["max_stock"])
                             });
                         }
                     }
@@ -92,8 +93,7 @@ namespace Ecommerce_API.Data.Concrete
                     }
                     return new { RowsAffected = 0, UpdatedQuantity = 0 };
                 },
-                new SqlParameter("@customerID", Convert.ToInt32(cart.customerId)),
-                new SqlParameter("@productID", Convert.ToInt32(cart.productId)),
+                new SqlParameter("@cartItemId", Convert.ToInt32(cart.cartItemId)),
                 new SqlParameter("@change", Convert.ToString(cart.type))
                 );
             }

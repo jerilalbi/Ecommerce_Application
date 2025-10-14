@@ -34,20 +34,20 @@
                     </tr>
                     <tr>
                         <td>
-                            <h3>₹ @Model.price</h3>
+                            <h3 id="productPrice">₹ @Model.price</h3>
                         </td>
                     </tr>
                     <tr>
                         <td>
                             <div class="d-flex justify-content-evenly" style="width: 150px;height: 50px; color: white; font-size: 20px; font-weight: 600">
                                 <div id="reduceBtn" class="d-flex justify-content-center align-items-center" style="width: 40px; font-size: 23px; height: 50px; background-color: #80A1BA; cursor: pointer">
-                                    -
+                                    <i class="fa-solid fa-minus"></i>
                                 </div>
                                 <div id="productQuantity" class="d-flex justify-content-center align-items-center" style="width: 40px; height: 50px; background-color: #80A1BA">
                                     1
                                 </div>
                                 <div id="increaseBtn" class="d-flex justify-content-center align-items-center" style="width: 40px; height: 50px; background-color: #80A1BA; cursor: pointer ">
-                                    +
+                                    <i class="fa-solid fa-plus"></i>
                                 </div>
                             </div>
                         </td>
@@ -80,6 +80,7 @@
 
             let productQuantity = 1;
             let maxQuantity = @Model.quantity;
+            let productPrice = @Model.price;
 
             const quantityValue = $('#productQuantity').text().trim();
             let currentValue = parseInt(quantityValue);
@@ -96,6 +97,7 @@
                 }
 
                 $('#productQuantity').text(currentValue);
+                $('#productPrice').text(`₹ ${productPrice * currentValue}`)
             })
 
             $("#increaseBtn").click(() => {
@@ -106,6 +108,7 @@
                 }
 
                 $('#productQuantity').text(currentValue);
+                $('#productPrice').text(`₹ ${productPrice * currentValue}`)
             })
 
             $('#addToCartBtn').click(() => {
@@ -140,9 +143,9 @@
                 });
             })
 
-            $.get('@Url.Action("LoadHeader", "Home")', function (data) {
-                $('#dynamicHeaderContent').html(data);
-            });
+              $.get('@Url.Action("LoadHeader", "Home")', { isCart: false}, function (data) {
+                    $('#dynamicHeaderContent').html(data);
+                });
 
             function disableBtn() {
                 const btn = $('#addToCartBtn');

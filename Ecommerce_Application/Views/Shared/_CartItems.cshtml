@@ -1,8 +1,13 @@
 ﻿@model List<Ecommerce_Application.Models.CartModel>
+@{ 
+    ViewBag.TotalAmount = Model.Sum(item => item.SubTotal);
+}
+
 
 @if (Model != null && Model.Any())
 {
-    foreach (var item in Model)
+    <div class="hide-scrollbar" style="width: 60%; height: 500px; overflow-y: auto">
+    @foreach (var item in Model)
     {
         <div class="w-100 rounded-4 d-flex mb-2 pe-2" style="height: 150px; background-color: white">
             <img src=@item.ProductImg class="img-fluid" style="height: 150px; width: 150px; border-start-start-radius: 1rem; border-end-start-radius: 1rem" />
@@ -20,31 +25,108 @@
                 <tr>
                     <td>
                         <div class="d-flex justify-content-evenly" style="width: 120px;height: 40px; color: white; font-size: 20px; font-weight: 600">
-                            <div class="d-flex justify-content-center align-items-center" style="width: 30px; font-size: 23px; height: 40px; background-color: #80A1BA; cursor: pointer">
-                                -
+                            <div onclick="updateCartItem(@item.CartItemId,'decrease', @item.Quantity, @item.MaxStock)" class="d-flex justify-content-center align-items-center" style="width: 30px; font-size: 23px; height: 40px; background-color: #80A1BA; cursor: pointer">
+                                <i class="fa-solid fa-minus"></i>
                             </div>
                             <div class="d-flex justify-content-center align-items-center" style="width: 30px; height: 40px; background-color: #80A1BA">
                                 @item.Quantity
                             </div>
-                            <div class="d-flex justify-content-center align-items-center" style="width: 30px; height: 40px; background-color: #80A1BA; cursor: pointer ">
-                                +
+                            <div onclick="updateCartItem(@item.CartItemId,'increase',@item.Quantity, @item.MaxStock)" class="d-flex justify-content-center align-items-center" style="width: 30px; height: 40px; background-color: #80A1BA; cursor: pointer ">
+                                <i class="fa-solid fa-plus"></i>
                             </div>
                         </div>
                     </td>
                 </tr>
             </table>
             <div class="d-flex justify-content-center align-items-center ms-auto" style="cursor: pointer">
-                    <button type="button" onclick="deleteCartItem(@item.CartItemId)" class="btn btn-link p-0">
-                        <i class="fa-solid fa-trash" style="color: red; font-size: 30px"></i>
-                    </button>
+                <button type="button" onclick="deleteCartItem(@item.CartItemId)" class="btn btn-link p-0">
+                    <i class="fa-solid fa-trash" style="color: red; font-size: 30px"></i>
+                </button>
             </div>
         </div>
     }
+        </div>
+    <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+        <div class="rounded-4 d-flex justify-content-center align-items-center p-3" style="width: 60%; background-color: #91C4C3">
+            <table style="border-collapse: separate; border-spacing: 10px 5px; width: 100%">
+                <tr>
+                    <td>
+                        <h5>Cost: </h5>
+                    </td>
+                    <td>
+                        <h4>@ViewBag.TotalAmount</h4>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <h5>Delivery Charge: </h5>
+                    </td>
+                    <td>
+                        <h4>100</h4>
+                    </td>
+                </tr>
+                @if (ViewBag.TotalAmount > 2000)
+                {
+                    <tr>
+                        <td>
+                            <h5>Promotion Applied: </h5>
+                        </td>
+                        <td>
+                            <h4>- 100</h4>
+                        </td>
+                    </tr>
+                }
+                <tr>
+                    <td>
+                        <h5>Total: </h5>
+                    </td>
+                    <td>
+                        <h4>@(ViewBag.TotalAmount > 2000 ? ViewBag.TotalAmount: ViewBag.TotalAmount + 100) </h4>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button class="btn" type="submit" style="background-color: #FFF7DD; color: black !important ">Check Out</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
 }
+else
+{
+    <h5>No Items in the Cart</h5>
+}
+<div id="toastMsg" style="visibility: hidden" class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div class="toast show bg-danger text-white">
+        <div class="toast-header">
+            <strong class="me-auto">Item Stock Max</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body">
+            Max Item Stock Reached
+        </div>
+    </div>
+</div>
 <script>
     function deleteCartItem(cartItemId) {
         $.post('/Cart/DeleteItem', { id: cartItemId }, function (html) {
             $('#cartContainer').html(html);
         });
+    }
+
+    function updateCartItem(cartItemId, updateType, quantity, maxStock) {
+        if (quantity < maxStock) {
+            if (updateType != 'decrease' || quantity > 1) {
+                $.post('/Cart/UpdateItem', { cartId: cartItemId, type: updateType }, function (html) {
+                    $('#cartContainer').html(html);
+                });
+                console.log("apii called");
+                $('#toastMsg').css('visibility', 'hidden');
+            }
+        } else {
+            $('#toastMsg').css('visibility', 'visible');
+        }
     }
 </script>

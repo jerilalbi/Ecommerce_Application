@@ -54,5 +54,21 @@ namespace Ecommerce_Application.Services
                 throw;
             }
         }
+
+        public Task<bool> UpdateCartItem(string token, int cartId, string type) {
+            try
+            {
+                return CallAPI(async client =>
+                {
+                    var body = new { cartItemId = cartId, type = type };
+                    var response = await client.PutAsJsonAsync("cart/update", body);
+                    return response.IsSuccessStatusCode;
+                }, token);
+            }catch(Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                throw;
+            }
+        }
     }
 }

@@ -19,10 +19,11 @@ namespace Ecommerce_Application.Controllers
             return View(products);
         }
 
-        public async Task<ActionResult> LoadHeader()
+        public async Task<ActionResult> LoadHeader(bool isCart)
         {
             try
             {
+                ViewData["isCart"] = isCart;
                 List<string> categories = await productServices.GetAllCategories(Request.Cookies["Token"].Value.ToString());
                 return PartialView("_Header", categories);
             }

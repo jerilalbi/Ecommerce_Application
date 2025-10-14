@@ -15,6 +15,7 @@ namespace Ecommerce_Application.Controllers
         protected readonly CartServices cartServices = new CartServices();
         public async Task<ActionResult> Index()
         {
+            ViewData["isCart"] = true;
             int customerId = Convert.ToInt32(Session["UserId"] ?? 3);
             List<CartModel> cartItems = await cartServices.ViewCartItems(Request.Cookies["Token"].Value.ToString(),customerId);
 
@@ -32,7 +33,6 @@ namespace Ecommerce_Application.Controllers
         [HttpPost]
         public async Task<ActionResult> DeleteItem(int id)
         {
-            Debug.WriteLine($"cart item id: {id}");
             bool isDeleted = await cartServices.DeleteCartItem(Request.Cookies["Token"].Value.ToString(), id);
             int customerId = Convert.ToInt32(Session["UserId"] ?? 3);
             List<CartModel> cartItems = await cartServices.ViewCartItems(Request.Cookies["Token"].Value.ToString(), customerId);
@@ -42,6 +42,21 @@ namespace Ecommerce_Application.Controllers
                 return PartialView("_CartItems", cartItems);
             }
             return View(cartItems);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> UpdateItem(int cartId, string type)
+        {
+            bool isItemUpdated = await cartServices.UpdateCartItem(Request.Cookies["Token"].Value.ToString(), cartId, type);
+            int customerId = Convert.ToInt32(Session["UserId"] ?? 3);
+            List<CartModel> cartItems = await cartServices.ViewCartItems(Request.Cookies["Token"].Value.ToString(), customerId);
+
+            if (isItemUpdated)
+            {
+                return PartialView("_CartItems", cartItems);
+            }
+            return View(cartItems);
+
         }
     }
 }

@@ -15,5 +15,6 @@ namespace Ecommerce_API.Models
         public int Quantity { get; set; }
         public int Price { get; set; }
         public int SubTotal { get; set; }
+        public int MaxStock { get; set; }
     }
 }

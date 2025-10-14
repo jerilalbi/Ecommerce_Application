@@ -39,9 +39,9 @@
     <script src="~/Scripts/jquery-3.7.0.min.js"></script>
     <script>
         $(document).ready(function () {
-            $.get('@Url.Action("LoadHeader", "Home")', function (data) {
-            $('#dynamicHeaderContent').html(data);
-        });
+              $.get('@Url.Action("LoadHeader", "Home")', { isCart: false}, function (data) {
+                    $('#dynamicHeaderContent').html(data);
+            });
     });
     </script>
 </body>

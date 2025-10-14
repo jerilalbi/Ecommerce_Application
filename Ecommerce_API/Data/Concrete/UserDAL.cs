@@ -117,16 +117,14 @@ namespace Ecommerce_API.Data.Concrete
                     if (reader.HasRows)
                     {
                         reader.Read();
-                        string address = Convert.ToString(reader["address"]);
-                        string phone = Convert.ToString(reader["phone"]);
 
                             return new UserModel
                             {
-                                UserId = user.UserId,
-                                Name = user.Name,
-                                Email = user.Email,
-                                Address = address,
-                                Phone = phone,
+                                UserId = Convert.ToInt32(reader["User_ID"]),
+                                Name = Convert.ToString(reader["name"]),
+                                Email = Convert.ToString(reader["email"]),
+                                Address = Convert.ToString(reader["address"]),
+                                Phone = Convert.ToString(reader["phone"]),
                             };
                     }
                     else

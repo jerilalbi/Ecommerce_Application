@@ -161,6 +161,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\CartServices.cs" />
     <Compile Include="Services\ProductServices.cs" />
+    <Compile Include="Services\ProfileServices.cs" />
     <Compile Include="Services\UserServices.cs" />
   </ItemGroup>
   <ItemGroup>

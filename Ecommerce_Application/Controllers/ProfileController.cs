@@ -1,6 +1,10 @@
-﻿using System;
+﻿using Ecommerce_Application.Models;
+using Ecommerce_Application.Services;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -8,9 +12,22 @@ namespace Ecommerce_Application.Controllers
 {
     public class ProfileController : Controller
     {
-        public ActionResult Index()
+        protected readonly ProfileServices profileServices = new ProfileServices();
+        public async Task<ActionResult> Index()
         {
-            return View();
+            int userID = Convert.ToInt32(Session["UserId"] ?? 4);
+            UserModel userData = await profileServices.GetUserDetails(userID, Request.Cookies["Token"].Value.ToString());
+            return View(userData);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> UpdateAddress(UserModel user)
+        {
+            if (ModelState.IsValid) {
+                 bool result = await profileServices.UpdateAddress(user, Request.Cookies["Token"].Value.ToString());
+                ViewBag.IsUpdated = result;
+            }
+            return RedirectToAction("Index"); ;
         }
     }
 }
