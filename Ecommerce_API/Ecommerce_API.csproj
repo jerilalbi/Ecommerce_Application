@@ -228,6 +228,8 @@
     <Compile Include="Models\StocksModel.cs" />
     <Compile Include="Models\TopProductsModel.cs" />
     <Compile Include="Models\UserModel.cs" />
+    <Compile Include="Models\ViewOrderModel.cs" />
+    <Compile Include="Models\ViewOrdersAdminModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>

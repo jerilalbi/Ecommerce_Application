@@ -19,8 +19,6 @@
         e.preventDefault();
         const url = $(this).data('url');
 
-        console.log("button clicked");
-
         navLinks.removeClass('active');
         $(this).addClass('active');
 

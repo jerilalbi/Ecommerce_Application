@@ -1,3 +1,65 @@
-﻿<section style="background-color: #91C4C3; width: 100%; min-height: 100vh ">
+﻿<style>
+    #dashboardWrapper {
+        padding: 10px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+    }
 
+    #salesByMonth {
+        padding: 10px;
+        box-sizing: border-box;
+        background-color: #80A1BA;
+        border-radius: 10px;
+        height: 350px;
+        width: 100%;
+    }
+
+    #bottomSec{
+        flex-grow: 1;
+        display: flex;
+        justify-content: space-between
+    }
+
+    #salesByChannel {
+        margin-top: 10px;
+        padding: 10px;
+        box-sizing: border-box;
+        background-color: #80A1BA;
+        border-radius: 10px;
+        height: 350px;
+        width: 48%;
+        float: left;
+    }
+
+    #salesByCategory {
+        margin-top: 10px;
+        margin-left: 10px;
+        padding: 10px;
+        box-sizing: border-box;
+        background-color: #80A1BA;
+        border-radius: 10px;
+        height: 350px;
+        width: 50%;
+        float: left;
+    }
+</style>
+
+<section style="background-color: #91C4C3; width: 100%; min-height: 100vh ">
+    <div id="dashboardWrapper">
+        <div id="salesByMonth">
+            <canvas id="salesByMonthChart"></canvas>
+        </div>
+        <div id="bottomSec">
+            <div id="salesByChannel">
+                <canvas id="salesByChannelChart"></canvas>
+            </div>
+            <div id="salesByCategory">
+                <canvas id="salesByCategoryChart"></canvas>
+            </div>
+        </div>
+    </div>
 </section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="~/Scripts/App/SalesDashboard.js"></script>

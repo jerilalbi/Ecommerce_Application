@@ -39,6 +39,8 @@ namespace Ecommerce_Application.Controllers
                     Role = user.Role,
                 };
 
+                Session["UserId"] = user.UserId;
+
                 if(user.Role == "admin")
                 {
                     return RedirectToAction("Index","Admin");
@@ -90,6 +92,12 @@ namespace Ecommerce_Application.Controllers
                 return RedirectToAction("Login");
             }
             return View(register);
+        }
+
+        public ActionResult Logout()
+        {
+            Session.Abandon();
+            return RedirectToAction("Login");
         }
     }
 }

@@ -257,5 +257,56 @@ namespace Ecommerce_API.Data.Concrete
                 throw ex;
             }
         }
+
+        public List<ViewOrdersAdminModel> GetAllOrdersAdmins()
+        {
+            try
+            {
+                string storedProcedure = "ViewOrdersAdmin";
+                return ExecuteSQL(storedProcedure, cmd =>
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    List<ViewOrdersAdminModel> orders = new List<ViewOrdersAdminModel>();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            orders.Add(new ViewOrdersAdminModel
+                            {
+                                DeliveryId = Convert.ToInt32(reader["delivery_id"]),
+                                ProductName = Convert.ToString(reader["product_name"]),
+                                Quantity = Convert.ToInt32(reader["Quantity_Sold"]),
+                                Address = Convert.ToString(reader["address"]),
+                                Status = Convert.ToString(reader["status"]),
+                            });
+                        }
+                        return orders;
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Logger.log(ex);
+                throw;
+            }
+        }
+
+        public int ShipOrder(int DeliveryID)
+        {
+            try
+            {
+                string storedProcedure = "ShipOrderAdmin";
+                return ExecuteSQL(storedProcedure, cmd =>
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    return cmd.ExecuteNonQuery();
+                }, new SqlParameter("@DeliveryItemID", DeliveryID));
+            }
+            catch (Exception ex)
+            {
+                Logger.log(ex);
+                throw;
+            }
+        }
     }
 }

@@ -35,51 +35,92 @@
         @if (String.IsNullOrEmpty(Model.Address))
         {
             <h3>Add Address:</h3>
-            using (Html.BeginForm("UpdateAddress", "Profile", FormMethod.Post))
-            {
-                @Html.HiddenFor(m => m.UserId)
-                <label>Address:</label>
-                @Html.TextAreaFor(m => m.Address, new { @class = "form-control form-control-lg", @rows = "5", @style = "width: 500px;" });
-                @Html.ValidationMessageFor(m => m.Address, "", new { @stle = "color: red;" });
-                <button class="btn mt-3" type="submit" style="background-color: #91C4C3 ">Add</button>
-            }
         }
         else
         {
             <h3>Update Address:</h3>
-            using (Html.BeginForm("UpdateAddress", "Profile", FormMethod.Post))
-            {
-                @Html.HiddenFor(m => m.UserId)
-                <label>Address:</label>
-                @Html.TextAreaFor(m => m.Address, new { @class = "form-control form-control-lg", @rows = "5", @style = "width: 500px;" });
-                @Html.ValidationMessageFor(m => m.Address, "", new { @stle = "color: red;" });
-                <button class="btn mt-3" type="submit" style="background-color: #91C4C3 ">Update</button>
-            }
         }
+
+        @Html.HiddenFor(m => m.UserId, new { id = "userIdInput" })
+
+        <label>Address:</label>
+        @Html.TextAreaFor(m => m.Address, new { @class = "form-control form-control-lg", @rows = "5", @style = "width: 500px;", id = "addressInput" })
+        <p id="errorTxt" style="color: red"></p>
+
+        <button id="updateAddressBtn" class="btn mt-3" type="button" style="background-color: #91C4C3 ">@(String.IsNullOrEmpty(Model.Address) ? "Add Address" : "Update Address")</button>
+
     </div>
 
-    @if (ViewBag.IsUpdated != null)
-    {
-        <div class="toast-container position-fixed bottom-0 end-0 p-3">
-            <div class="toast show bg-success text-white">
+        <div id="toast" style="visibility: hidden" class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div id="toastBody" class="toast show bg-success text-white">
                 <div class="toast-header">
-                    <strong class="me-auto">Updated</strong>
+                    <strong id="toastTitle" class="me-auto">Updated</strong>
                     <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
                 </div>
-                <div class="toast-body">
+                <div id="toastMsg" class="toast-body">
                     User Address Updated
                 </div>
             </div>
         </div>
-    }
 
     <script src="~/Scripts/bootstrap.bundle.min.js"></script>
     <script src="~/Scripts/jquery-3.7.0.min.js"></script>
     <script>
         $(document).ready(function () {
+
+            $('#updateAddressBtn').click(function () {
+                const btn = $(this);
+
+                $('#toast').css('visibility', 'hidden')
+                $('#errorTxt').text('');
+                btn.prop('disabled', true).text('Saving...');
+
+                const userId = $('#userIdInput').val();
+                const address = $('#addressInput').val();
+
+                if (address.trim() === "") {
+
+                    btn.prop('disabled', false).text('Update Address');
+                    $('#errorTxt').text('Add Address');
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("UpdateAddress", "Profile")',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        UserId: userId,
+                        Address: address
+                    },
+                    success: (response) => {
+                        if (response.success === true) {
+                            $('#toastBody').removeClass('bg-danger'); 
+                            $('#toast').css('visibility', 'visible')
+                            $('#toastMsg').text('User Address Updated')
+                            $('#toastTitle').text('Updated')
+                        } else {
+                            $('#toast').css('visibility', 'visible')
+                            $('#toastBody').addClass('bg-danger')
+                            $('#toastMsg').text('User Address Not Updated')
+                            $('#toastTitle').text('Not Updated')
+                        }
+                    },
+                    error: (xhr, status, error) => {
+                        $('#toast').css('visibility', 'visible')
+                        $('#toastBody').addClass('bg-danger')
+                        $('#toastMsg').text(error)
+                        $('#toastTitle').text('Not Updated')
+                    },
+                    complete: () => {
+                        btn.prop('disabled', false).text('Update Address');
+                    }
+                })
+            })
+
             $.get('@Url.Action("LoadHeader", "Home")', { isCart: false}, function (data) {
             $('#dynamicHeaderContent').html(data);
-        });
+             });
     });
     </script>
 </body>

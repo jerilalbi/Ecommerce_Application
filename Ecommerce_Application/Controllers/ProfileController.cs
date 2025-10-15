@@ -15,19 +15,19 @@ namespace Ecommerce_Application.Controllers
         protected readonly ProfileServices profileServices = new ProfileServices();
         public async Task<ActionResult> Index()
         {
-            int userID = Convert.ToInt32(Session["UserId"] ?? 4);
+            int userID = Convert.ToInt32(Session["UserId"] ?? 3);
             UserModel userData = await profileServices.GetUserDetails(userID, Request.Cookies["Token"].Value.ToString());
             return View(userData);
         }
 
         [HttpPost]
-        public async Task<ActionResult> UpdateAddress(UserModel user)
+        public async Task<JsonResult> UpdateAddress(UserModel user)
         {
             if (ModelState.IsValid) {
                  bool result = await profileServices.UpdateAddress(user, Request.Cookies["Token"].Value.ToString());
-                ViewBag.IsUpdated = result;
+                return Json(new { success = result });
             }
-            return RedirectToAction("Index"); ;
+            return Json(new {success = false}); ;
         }
     }
 }

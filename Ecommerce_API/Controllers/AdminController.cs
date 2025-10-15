@@ -129,5 +129,37 @@ namespace Ecommerce_API.Controllers
                 return BadRequest("Product not Updated");
             }
         }
+
+        [HttpGet]
+        [Route("allOrders")]
+        public IHttpActionResult ViewAllOrder()
+        {
+            AdminDAL adminDAL = new AdminDAL();
+            List<ViewOrdersAdminModel> orders = adminDAL.GetAllOrdersAdmins();
+            if (orders.Count >= 0)
+            {
+                return Ok(orders);
+            }
+            else
+            {
+                return BadRequest("No Orders");
+            }
+        }
+
+        [HttpPut]
+        [Route("order/ship/{id}")]
+        public IHttpActionResult ShipOrder(int id)
+        {
+            AdminDAL adminDAL = new AdminDAL();
+            int result = adminDAL.ShipOrder(id);
+            if (result != 0)
+            {
+                return Ok(new { message = "Order Shipped" });
+            }
+            else
+            {
+                return BadRequest("Error");
+            }
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿
+﻿@model Ecommerce_Application.Models.UserModel
 @{
     Layout = null;
 }
@@ -20,26 +20,146 @@
 <body>
     <div class="d-flex justify-content-center align-items-center vh-100">
         <div class="p-4 rounded-4" style="background-color: #B4DEBD; width: 500px">
-            <table>
-                <tr>
-                    <td class="align-top" style="width: 150px">
-                        <h4>Deliver To:</h4>
-                    </td>
-                    <td>
-                        <h3>Jeril Albi</h3>
-                        <h4>Kollamaparambil house, vadakkumpuram po, 683521</h4>
-                        <h5>8075041750</h5>
-                    </td>
-                </tr>
-                <tr class="mt-4">
-                    <td></td>
-                    <td>
-                        <button class="btn mt-3" type="submit" style="background-color: #FFF7DD; color: black !important ">Proceed</button>
-                    </td>
-                </tr>
-            </table>
+            @if (String.IsNullOrEmpty(Model.Address))
+            {
+                <h4>No Address Present !</h4>
+                <a href="@Url.Action("Index","Profile")">
+                    <span class="btn" type="submit" style="background-color: #FFF7DD; color: black !important ">Add Address</span>
+                </a>
+            }
+            else
+            {
+                <table>
+                    <tr id="changeAddressSec" style="display: none">
+                        <td class="align-top" style="width: 150px">
+                            <h4>Deliver To:</h4>
+                        </td>
+                        <td>
+                            <textarea id="newAddress" class="form-control form-control-lg" rows="4" style="width: 350px"></textarea> <br />
+                            <p id="validatorAddress" style="color: red; display: none">Add Address</p>
+                            <button id="cancelBtn" class="btn mt-1" type="submit" style="background-color: #FFF7DD; color: black !important ">Cancel</button>
+                        </td>
+                    </tr>
+                    <tr id="oldAddressSec">
+                        <td class="align-top" style="width: 150px">
+                            <h4>Deliver To:</h4>
+                        </td>
+                        <td>
+                            <h3>@Model.Name</h3>
+                            <h4>@Model.Address</h4>
+                            <h5>@Model.Phone</h5>
+                        </td>
+                    </tr>
+                    <tr class="mt-4">
+                        <td>
+                            <button id="changeAddBtn" class="btn mt-3" type="submit" style="background-color: #FFF7DD; color: black !important ">Change Address</button>
+                        </td>
+                        <td>
+                            <button id="proceedBtn" class="btn mt-3" type="button" style="background-color: #FFF7DD; color: black !important ">Proceed</button>
+                        </td>
+                    </tr>
+                </table>
+            }
         </div>
     </div>
+
+    <div id="orderConfirmationModel" class="modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Order Placed</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Order Placed Successfully, Continue Shopping</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="@Url.Action("ContinueShopping","Order")">
+                        <div class="btn btn-primary">Continue</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" style="visibility: hidden" class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toastBody" class="toast show bg-success text-white">
+            <div class="toast-header">
+                <strong id="toastTitle" class="me-auto">Updated</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div id="toastMsg" class="toast-body">
+                User Address Updated
+            </div>
+        </div>
+    </div>
+
     <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+    <script src="~/Scripts/jquery-3.7.0.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            let isNewAddress = false;
+            let address = '@Model.Address';
+
+            $('#changeAddBtn').click(function () {
+                isNewAddress = true;
+                $('#oldAddressSec').hide();
+                $(this).hide();
+                $('#changeAddressSec').show();
+            })
+
+            $('#cancelBtn').click(function () {
+                isNewAddress = false;
+                $('#changeAddressSec').hide();
+                $('#oldAddressSec').show()
+                $('#changeAddBtn').show();
+            })
+
+            $('#proceedBtn').click(function () {
+
+                if (isNewAddress) {
+                    if ($('#newAddress').val().trim() != "") {
+                        $('#validatorAddress').hide();
+                        address = $('#newAddress').val().trim();
+                    } else {
+                        address = '@Model.Address'
+                        $('#validatorAddress').show();
+                        return;
+                    }
+                }
+
+                $.ajax({
+                    url: '@Url.Action("AddOrder","Order")',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        address: address
+                    },
+                    success: (response) => {
+                        if (response.success === true) {
+                            $('#orderConfirmationModel').modal({
+                                backdrop: 'static',
+                                keyboard: false
+                            }).modal('show');
+                        } else {
+                            $('#toast').css('visibility', 'visible')
+                            $('#toastBody').addClass('bg-danger')
+                            $('#toastMsg').text('Order Not Placed')
+                            $('#toastTitle').text('Error')
+                        }
+                    },
+                    error: (xhr, status, error) => {
+                        $('#toast').css('visibility', 'visible')
+                        $('#toastBody').addClass('bg-danger')
+                        $('#toastMsg').text(error)
+                        $('#toastTitle').text('Not Updated')
+                    },
+                })
+            })
+
+
+        })
+    </script>
 </body>
 </html>

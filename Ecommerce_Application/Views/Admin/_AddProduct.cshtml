@@ -1,3 +1,88 @@
-﻿<section style="background-color: teal; width: 100%; min-height: 100vh ">
+﻿@model  List<string>
+<section style="background-color: #91C4C3; width: 100%; min-height: 100vh; padding: 15px">
+    <div>
+        <h3>Add Product</h3>
+        <table style="border-collapse: separate; border-spacing: 0 10px">
+            <tr>
+                <td>
+                    <input id="productNameField" type="text" class="form-control form-control-lg" placeholder="Product Name" style="width: 350px;" />
+                </td>
+                <td class="align-middle">
+                    <h5 id="productNameError" style="display: none" class="text-danger">Enter the Name</h5>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="dropdown" style="margin-top: 10px">
+                        <button id="showCategory" class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Category
+                        </button>
+                        <ul class="dropdown-menu">
+                            @if (Model != null)
+                            {
+                                foreach (var category in Model)
+                                {
+                                    <li><a class="dropdown-item" href="#">@category</a></li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </td>
+                <td class="align-middle">
+                    <h5 id="productCategoryError" style="display: none" class="text-danger">Select Category</h5>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input id="productPriceField" type="number" class="form-control form-control-lg" min="1" placeholder="Product Price" onkeypress="return event.charCode >= 48" style="width: 350px;" />
+                </td>
+                <td class="align-middle">
+                    <h5 id="productPriceError" style="display: none" class="text-danger">Enter the Price</h5>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input id="productStockField" type="number" class="form-control form-control-lg" min="1" placeholder="Product Stock" onkeypress="return event.charCode >= 48" style="width: 350px;" />
+                </td>
+                <td class="align-middle">
+                    <h5 id="productStockError" style="display: none" class="text-danger">Enter the Stock</h5>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input id="productImgField" type="text" class="form-control form-control-lg" placeholder="Product Img" style="width: 350px;" />
+                </td>
+                <td class="align-middle">
+                    <h5 id="productImgError" style="display: none" class="text-danger">Enter the Img</h5>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <button id="addProductBtn" type="button" class="btn btn-success">Add Product</button>
+                </td>
+            </tr>
+        </table>
+
+    </div>
 </section>
+
+<script>
+    $(document).ready(function () {
+
+        $('.dropdown-item').click(function (event) {
+            event.preventDefault();
+            const selectedText = $(this).text();
+            $('#showCategory').text(selectedText);
+        })
+
+    })
+
+    function validateInputs() {
+        const productName = $('#productNameField').val()
+        const productCategory = $('#productCategoryField').text()
+        const productPrice = $('#productPriceField').val()
+        const productStock = $('#productStockField').val()
+        const productImg = $('#productImgField').val()
+    }
+</script>
 

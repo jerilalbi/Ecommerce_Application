@@ -1,4 +1,4 @@
-﻿@model List<Ecommerce_Application.Models.CartModel>
+﻿@model List<Ecommerce_Application.Models.ViewOrdersModel>
 @{
     Layout = null;
 }
@@ -8,7 +8,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>Cart</title>
+    <title>View Orders</title>
     <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
@@ -31,20 +31,21 @@
         <div id="dynamicHeaderContent">
         </div>
     </header>
-    <div class="p-3" style="margin-top: 70px">
-        <h3>My Cart</h3>
-        <div id="cartContainer" class="mt-3 d-flex">
-                @Html.Partial("_CartItems", Model)
+    <div style="margin-top: 70px; padding: 1rem 5rem">
+        <h3>My Orders</h3>
+        <div id="orderContainer" class="mt-3 d-flex">
+            @Html.Partial("_ViewOrdersSec", Model)
         </div>
     </div>
     <script src="~/Scripts/bootstrap.bundle.min.js"></script>
     <script src="~/Scripts/jquery-3.7.0.min.js"></script>
     <script>
       $(document).ready(function () {
-          $.get('@Url.Action("LoadHeader", "Home")', { isCart: true}, function (data) {
+          $.get('@Url.Action("LoadHeader", "Home")', { isCart: false}, function (data) {
             $('#dynamicHeaderContent').html(data);
         });
       });
     </script>
 </body>
 </html>
+

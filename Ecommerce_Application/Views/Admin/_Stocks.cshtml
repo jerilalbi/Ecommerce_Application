@@ -1,0 +1,102 @@
+﻿<style>
+    #dashboardWrapper {
+        padding: 10px;
+        box-sizing: border-box;
+        height: 100%;
+        width: 100%;
+    }
+
+    #salesByMonth {
+        padding: 10px;
+        box-sizing: border-box;
+        background-color: #80A1BA;
+        border-radius: 10px;
+        height: 90vh;
+        width: 100%;
+    }
+</style>
+
+<section style="background-color: #91C4C3; width: 100%; min-height: 100vh; display: flex; align-items: center">
+    <div id="dashboardWrapper">
+        <div id="salesByMonth">
+            <canvas id="stockDataChart"></canvas>
+        </div>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    $(document).ready(() => {
+
+        $.get('/Admin/GetStocks').done((data) => {
+
+            if (data.success) {
+                createStockDataChart(data.stockData)
+            } else {
+                console.log('No data found or API failed')
+            }
+
+        });
+
+    })
+
+    function createStockDataChart(stockData) {
+        const ctx = document.getElementById('stockDataChart').getContext('2d');
+
+        const rawData = stockData;
+        const labels = rawData.map(x => x.ProductName);
+        const data = rawData.map(x => x.Quantity);
+
+
+        const myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    borderWidth: 1,
+                    backgroundColor: 'black',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Low Stock Products',
+                        align: 'start',
+                        color: '#000',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        }
+                    },
+                    legend: {
+                        display: false,
+                    },
+                    datalabels: {
+                        color: '#000',
+                        font: { weight: 'bold', size: 14 },
+                        formatter: (value, ctx) => {
+                            let label = ctx.chart.data.labels[ctx.dataIndex];
+                            return label + '\n' + value;
+                        }
+                    },
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#000', font: { weight: 'bold' } },
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: '#000', font: { weight: 'bold' } },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+</script>
+

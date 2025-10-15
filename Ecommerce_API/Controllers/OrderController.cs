@@ -27,5 +27,37 @@ namespace Ecommerce_API.Controllers
                 return Ok(new { success = true, message = "Order Added" });
             }
         }
+
+        [HttpGet]
+        [Route("user/{id}")]
+        public IHttpActionResult ViewOrder(int id)
+        {
+            OrderDAL orderDAL = new OrderDAL();
+            List<ViewOrderModel> orders = orderDAL.ViewOrders(id);
+            if(orders.Count > 0)
+            {
+                return Ok(orders);
+            }
+            else
+            {
+                return BadRequest("No Orders");
+            }
+        }
+
+        [HttpPut]
+        [Route("cancel/{id}")]
+        public IHttpActionResult CancelOrder(int id)
+        {
+            OrderDAL orderDAL = new OrderDAL();
+            int result = orderDAL.CancelOrder(id);
+            if (result != 0)
+            {
+                return Ok(new {message = "Order Cancelled"});
+            }
+            else
+            {
+                return BadRequest("Error");
+            }
+        }
     }
 }

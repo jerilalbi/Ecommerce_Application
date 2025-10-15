@@ -12,8 +12,6 @@ namespace Ecommerce_Application.Models
         public string Name { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
-
-        [Required(ErrorMessage = "Add address")]
         public string Address { get; set; }
         public string Role { get; set; }
     }

@@ -9,5 +9,6 @@ namespace Ecommerce_API.Models
     {
         public int CustomerId { get; set; }
         public int TotalAmount { get; set; }
+        public string Address { get; set; }
     }
 }
