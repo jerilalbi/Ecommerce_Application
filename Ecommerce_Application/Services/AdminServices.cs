@@ -1,6 +1,7 @@
 ﻿using Ecommerce_Application.Helpers;
 using Ecommerce_Application.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -99,7 +100,83 @@ namespace Ecommerce_Application.Services
             {
                 return CallAPI(async client =>
                 {
-                    var response = await client.PutAsJsonAsync("", product);
+                    var response = await client.PostAsJsonAsync("admin/addProduct", product);
+                    return response.IsSuccessStatusCode;
+                }, token);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                throw;
+            }
+        }
+
+        public Task<bool> UpdateProduct(ProductModel product, string token)
+        {
+            try
+            {
+                return CallAPI(async client =>
+                {
+                    var response = await client.PutAsJsonAsync("admin/updateProduct", product);
+                    return response.IsSuccessStatusCode;
+                }, token);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                throw;
+            }
+        }
+
+        public Task<bool> DeleteProduct(int id, string token)
+        {
+            try
+            {
+                return CallAPI(async client =>
+                {
+                    var response = await client.DeleteAsync($"admin/deleteProduct/{id}");
+                    return response.IsSuccessStatusCode;
+                }, token);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                throw;
+            }
+        }
+
+        public Task<List<UserModel>> GetAllUsers(string token)
+        {
+            try
+            {
+                return CallAPI(async client =>
+                {
+                    var response = await client.GetAsync($"admin/getAllUsers");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json = await response.Content.ReadAsStringAsync();
+                        JObject jobject = JObject.Parse(json);
+                        JToken userData = jobject["allUsers"];
+                        return userData.ToObject<List<UserModel>>();
+                    }
+                    return null;
+                }, token);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                throw;
+            }
+        }
+
+        public Task<bool> MakeAdmin(string email, string token)
+        {
+            try
+            {
+                return CallAPI(async client =>
+                {
+                    var body = new { Email = email };
+                    var response = await client.PutAsJsonAsync($"admin/makeAdmin",body);
                     return response.IsSuccessStatusCode;
                 }, token);
             }

@@ -42,9 +42,10 @@ namespace Ecommerce_Application.Controllers
             return PartialView("_AddProduct", categories);
         }
 
-        public ActionResult Users()
+        public async Task<ActionResult> Users()
         {
-            return PartialView("_Users");
+            List<UserModel> users = await adminServices.GetAllUsers(Request.Cookies["Token"].Value);
+            return PartialView("_Users",users);
         }
 
         public ActionResult LogOut()
@@ -112,6 +113,30 @@ namespace Ecommerce_Application.Controllers
             dynamic data = await adminServices.GetDeliveryOrders(Request.Cookies["Token"].Value);
             List<DeliveryModel> orderData = JsonConvert.DeserializeObject<List<DeliveryModel>>(Convert.ToString(data));
             return PartialView("_Orders", orderData);
+        }
+
+        public async Task<JsonResult> AddNewProduct(ProductModel product)
+        {
+            bool isProductAdded = await adminServices.AddNewProduct(product, Request.Cookies["Token"].Value);
+            return Json(new { success = isProductAdded, });
+        }
+
+        public async Task<JsonResult> UpdateProduct(ProductModel product)
+        {
+            bool isProductAdded = await adminServices.UpdateProduct(product, Request.Cookies["Token"].Value);
+            return Json(new { success = isProductAdded, });
+        }
+
+        public async Task<JsonResult> DeleteProduct(int productId)
+        {
+            bool isProductAdded = await adminServices.DeleteProduct(productId, Request.Cookies["Token"].Value);
+            return Json(new { success = isProductAdded, });
+        }
+
+        public async Task<JsonResult> MakeAdmin(string email)
+        {
+            bool isProductAdded = await adminServices.MakeAdmin(email, Request.Cookies["Token"].Value);
+            return Json(new { success = isProductAdded, });
         }
     }
 }

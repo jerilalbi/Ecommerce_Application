@@ -134,7 +134,6 @@ else
                 $.post('/Cart/UpdateItem', { cartId: cartItemId, type: updateType }, function (html) {
                     $('#cartContainer').html(html);
                 });
-                console.log("apii called");
                 $('#toastMsg').css('visibility', 'hidden');
             }
         } else {

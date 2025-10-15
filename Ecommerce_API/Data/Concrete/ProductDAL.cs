@@ -152,8 +152,9 @@ namespace Ecommerce_API.Data.Concrete
                     cmd.CommandType = CommandType.StoredProcedure;
                     using (SqlDataReader reader = cmd.ExecuteReader()) {
                         while (reader.Read()) {
-                            products.Add(new ProductModel { 
+                            products.Add(new ProductModel {
                                 ProductId = Convert.ToInt32(reader["product_id"]),
+                                ProductCategory = Convert.ToString(reader["category"]),
                                 ProductName = Convert.ToString(reader["product_name"]),
                                 price = Convert.ToInt32(reader["price"]),
                                 imgUrl = Convert.ToString(reader["img"]),

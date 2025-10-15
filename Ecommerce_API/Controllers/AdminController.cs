@@ -130,6 +130,23 @@ namespace Ecommerce_API.Controllers
             }
         }
 
+        [HttpDelete]
+        [Route("deleteProduct/{productId}")]
+        public IHttpActionResult DeleteProduct(int productId)
+        {
+            AdminDAL adminDAL = new AdminDAL();
+            int result = adminDAL.deleteProduct(productId);
+
+            if (result != 0)
+            {
+                return Ok(new { success = true, message = "Product Deleted" });
+            }
+            else
+            {
+                return BadRequest("Product not Deleted");
+            }
+        }
+
         [HttpGet]
         [Route("allOrders")]
         public IHttpActionResult ViewAllOrder()

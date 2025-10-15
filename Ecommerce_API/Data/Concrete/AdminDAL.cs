@@ -258,6 +258,26 @@ namespace Ecommerce_API.Data.Concrete
             }
         }
 
+        public int deleteProduct(int productId)
+        {
+            try
+            {
+                string storedProcedure = "DeleteProduct";
+                return ExecuteSQL(storedProcedure, cmd =>
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    return cmd.ExecuteNonQuery();
+                },
+                new SqlParameter("@product_id", productId)
+                );
+            }
+            catch (Exception ex)
+            {
+                Logger.log(ex);
+                throw ex;
+            }
+        }
+
         public List<ViewOrdersAdminModel> GetAllOrdersAdmins()
         {
             try
