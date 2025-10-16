@@ -296,6 +296,7 @@ namespace Ecommerce_API.Data.Concrete
                                 DeliveryId = Convert.ToInt32(reader["delivery_id"]),
                                 ProductName = Convert.ToString(reader["product_name"]),
                                 Quantity = Convert.ToInt32(reader["Quantity_Sold"]),
+                                Name = Convert.ToString(reader["Name"]),
                                 Address = Convert.ToString(reader["address"]),
                                 Status = Convert.ToString(reader["status"]),
                             });

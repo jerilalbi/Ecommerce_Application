@@ -129,7 +129,7 @@ else
     }
 
     function updateCartItem(cartItemId, updateType, quantity, maxStock) {
-        if (quantity < maxStock) {
+        if (updateType === 'decrease' || quantity < maxStock) {
             if (updateType != 'decrease' || quantity > 1) {
                 $.post('/Cart/UpdateItem', { cartId: cartItemId, type: updateType }, function (html) {
                     $('#cartContainer').html(html);

@@ -1,4 +1,5 @@
-﻿using Ecommerce_Application.Models;
+﻿using Ecommerce_Application.Filters;
+using Ecommerce_Application.Models;
 using Ecommerce_Application.Services;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Web.Mvc;
 
 namespace Ecommerce_Application.Controllers
 {
+    [JWTAuthorize]
     public class CartController : Controller
     {
         protected readonly CartServices cartServices = new CartServices();
@@ -25,9 +27,11 @@ namespace Ecommerce_Application.Controllers
         [HttpPost]
         public async Task<JsonResult> AddToCart(CartModel cartModel)
         {
-            cartModel.CustomerID = Convert.ToInt32(Session["UserId"] ?? 3);
+            int userId = Convert.ToInt32(Session["UserId"] ?? 3);
+            cartModel.CustomerID = userId;
             var result = await cartServices.AddToCart(cartModel, Request.Cookies["Token"].Value.ToString());
-            return Json(new {success = result});
+            List<CartModel> cartItems = await cartServices.ViewCartItems(Request.Cookies["Token"].Value, userId);
+            return Json(new {success = result, cartItemCount = cartItems.Count});
         }
 
         [HttpPost]

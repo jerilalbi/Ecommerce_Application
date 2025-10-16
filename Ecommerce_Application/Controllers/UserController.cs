@@ -29,16 +29,6 @@ namespace Ecommerce_Application.Controllers
 
             if (user != null)
             {
-                Session["user"] = new UserModel
-                {
-                    UserId = user.UserId,
-                    Name = user.Name,
-                    Email = user.Email,
-                    Address = user.Address,
-                    Phone = user.Phone,
-                    Role = user.Role,
-                };
-
                 Session["UserId"] = user.UserId;
 
                 if(user.Role == "admin")
@@ -97,6 +87,9 @@ namespace Ecommerce_Application.Controllers
         public ActionResult Logout()
         {
             Session.Abandon();
+            var cookie = new HttpCookie("Token");
+            cookie.Expires = DateTime.Now.AddDays(-1);
+            Response.Cookies.Add(cookie);
             return RedirectToAction("Login");
         }
     }

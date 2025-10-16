@@ -1,4 +1,5 @@
-﻿using Ecommerce_Application.Models;
+﻿using Ecommerce_Application.Filters;
+using Ecommerce_Application.Models;
 using Ecommerce_Application.Services;
 using Newtonsoft.Json;
 using System;
@@ -11,6 +12,7 @@ using System.Web.Mvc;
 
 namespace Ecommerce_Application.Controllers
 {
+    [JWTAuthorize(Role = "admin")]
     public class AdminController : Controller
     {
         protected readonly AdminServices adminServices = new AdminServices();
@@ -46,12 +48,6 @@ namespace Ecommerce_Application.Controllers
         {
             List<UserModel> users = await adminServices.GetAllUsers(Request.Cookies["Token"].Value);
             return PartialView("_Users",users);
-        }
-
-        public ActionResult LogOut()
-        {
-            Session.Abandon();
-            return RedirectToAction("Login", "User");
         }
 
         public async Task<JsonResult> GetSales()

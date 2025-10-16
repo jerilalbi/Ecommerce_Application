@@ -53,9 +53,21 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    data: data,
+                    data: data.map(value => {
+                        if (value === 0) {
+                            return 0.1;
+                        }
+                        return value;
+                    }),
                     borderWidth: 1,
-                    backgroundColor: 'black',
+                    backgroundColor: function (context) {
+                        const value = context.dataset.data[context.dataIndex];
+                        if (value < 5) {
+                            return '#ff3300'; 
+                        } else {
+                            return '#5cd65c';
+                        }
+                    },
                 }]
             },
             options: {

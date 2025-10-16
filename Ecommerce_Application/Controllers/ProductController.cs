@@ -1,4 +1,5 @@
-﻿using Ecommerce_Application.Models;
+﻿using Ecommerce_Application.Filters;
+using Ecommerce_Application.Models;
 using Ecommerce_Application.Services;
 using Newtonsoft.Json;
 using System;
@@ -11,6 +12,7 @@ using System.Web.Mvc;
 
 namespace Ecommerce_Application.Controllers
 {
+    [JWTAuthorize]
     public class ProductController : Controller
     {
         protected readonly ProductServices productServices = new ProductServices();
@@ -28,13 +30,17 @@ namespace Ecommerce_Application.Controllers
 
             ProductModel product = await productServices.GetProductDetails(Request.Cookies["Token"].Value.ToString(), id);
             List<CartModel> cartItems = await cartServices.ViewCartItems(Request.Cookies["Token"].Value.ToString(), customerId);
+            ProductDetailsModel productDetails = new ProductDetailsModel { };
 
             bool isInCart = cartItems.Any(c => c.ProductID == id);
             if (isInCart) {
-                ViewBag.ItemPresent = "present";
+                productDetails.CartProduct = cartItems.FirstOrDefault(item => item.ProductID == product.ProductId);
             }
 
-            return View(product);
+            productDetails.Product = product;
+            productDetails.IsProductPresent = isInCart;
+
+            return View(productDetails);
         }
 
         public async Task<ActionResult> SeachProduct(string query)

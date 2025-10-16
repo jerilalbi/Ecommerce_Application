@@ -18,6 +18,7 @@
                                         <th scope="col">No.</th>
                                         <th scope="col">Product</th>
                                         <th scope="col">Quantity</th>
+                                        <th scope="col">Name</th>
                                         <th scope="col">Address</th>
                                         <th scope="col">Status</th>
                                         <th scope="col">Action</th>
@@ -31,6 +32,7 @@
                                             <td>@(i+1)</td>
                                             <td>@orders.ProductName</td>
                                             <td>@orders.Quantity</td>
+                                            <td>@orders.Name</td>
                                             <td>@orders.Address</td>
                                             <td>@orders.Status</td>
                                             <td><button type="button" onclick="shipOrder(@orders.DeliveryId)" class="btn btn-success">Ship</button></td>

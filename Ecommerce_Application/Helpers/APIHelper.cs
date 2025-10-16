@@ -13,7 +13,8 @@ namespace Ecommerce_Application.Helpers
         protected delegate Task<T> ExecuteDelegate<T>(HttpClient client);
         protected static readonly HttpClient client = new HttpClient
         {
-            BaseAddress = new Uri("https://localhost:44301/api/")
+            //BaseAddress = new Uri("https://localhost:44301/api/")
+            BaseAddress = new Uri("http://localhost:60/api/")
         };
 
         protected async Task<T> CallAPI<T>(ExecuteDelegate<T> Execute, string token = null)

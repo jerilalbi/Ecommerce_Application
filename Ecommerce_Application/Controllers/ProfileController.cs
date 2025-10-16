@@ -1,4 +1,5 @@
-﻿using Ecommerce_Application.Models;
+﻿using Ecommerce_Application.Filters;
+using Ecommerce_Application.Models;
 using Ecommerce_Application.Services;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Web.Mvc;
 
 namespace Ecommerce_Application.Controllers
 {
+    [JWTAuthorize]
     public class ProfileController : Controller
     {
         protected readonly ProfileServices profileServices = new ProfileServices();

@@ -1,4 +1,4 @@
-﻿@model Ecommerce_Application.Models.ProductModel
+﻿@model Ecommerce_Application.Models.ProductDetailsModel
 @{
     Layout = null;
 }
@@ -24,17 +24,17 @@
     </header>
     <div class="d-flex justify-content-center align-items-center vh-100">
         <div class="p-4 border bg-white shadow-sm d-flex rounded-3" style="width: 90%">
-            <img src="@Model.imgUrl" class="img-fluid" style="max-height: 500px" />
+            <img src="@Model.Product.imgUrl" class="img-fluid" style="max-height: 500px" />
             <div class="d-flex justify-content-center align-items-center flex-grow-1">
                 <table>
                     <tr>
                         <td>
-                            <h1>@Model.ProductName</h1>
+                            <h1>@Model.Product.ProductName</h1>
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <h3 id="productPrice">₹ @Model.price</h3>
+                            <h3 id="productPrice">₹ @Model.Product.price</h3>
                         </td>
                     </tr>
                     <tr>
@@ -61,14 +61,15 @@
             </div>
         </div>
     </div>
-    <div id="toastMsg" style="visibility: hidden" class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div class="toast show bg-danger text-white">
+
+    <div id="toastMsg" class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toastElement" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
-                <strong class="me-auto">Item Stock Max</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                <strong id="toastHead" class="me-auto"></strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
-            <div class="toast-body">
-                Max Item Stock Reached
+            <div id="toastBody" class="toast-body">
+
             </div>
         </div>
     </div>
@@ -78,46 +79,68 @@
     <script>
         $(document).ready(function () {
 
-            let productQuantity = 1;
-            let maxQuantity = @Model.quantity;
-            let productPrice = @Model.price;
+            const toastElement = $('#toastElement');
+            const toast = new bootstrap.Toast(toastElement, {
+                autohide: true,
+                delay: 5000
+            });
 
-            const quantityValue = $('#productQuantity').text().trim();
-            let currentValue = parseInt(quantityValue);
+            let isProductPresent = @Html.Raw(Json.Encode(Model.IsProductPresent));
+            let productQuantity = isProductPresent ? @Html.Raw(Json.Encode(Model.CartProduct != null ? Model.CartProduct.Quantity : 1)) : 1;
+            let cartItemId = isProductPresent ? @Html.Raw(Json.Encode(Model.CartProduct != null ? Model.CartProduct.CartItemId : 0)) : 0;
+            let maxQuantity = @Model.Product.quantity;
+            let productPrice = '@Model.Product.price';
 
-            @if (ViewBag.ItemPresent != null) {
-                @:disableBtn();
+            let currentValue = parseInt(productQuantity);
+            productPrice = parseInt(productPrice);
+            productQuantity = parseInt(productQuantity);
+
+
+            if (isProductPresent) {
+                $('#productQuantity').text(productQuantity);
+                $('#productPrice').text(`₹ ${productPrice * currentValue}`);
+                disableBtn();
             }
 
             $("#reduceBtn").click(() => {
 
                 if (currentValue > 1) {
                     currentValue--;
-                    $('#toastMsg').css('visibility', 'hidden');
+                } else if (currentValue == 1) {
+                    return;
                 }
 
-                $('#productQuantity').text(currentValue);
-                $('#productPrice').text(`₹ ${productPrice * currentValue}`)
+                updateCartItem("decrease", function (success) {
+                    if (success) {
+                        $('#productQuantity').text(currentValue);
+                        $('#productPrice').text(`₹ ${productPrice * currentValue}`);
+                    }
+                });
             })
 
             $("#increaseBtn").click(() => {
                 if (currentValue < maxQuantity) {
                     currentValue++;
                 } else {
-                    $('#toastMsg').css('visibility', 'visible');
+                    showToast("Max Stock", "Max Stock Reached", "bg-danger");
+                    return;
                 }
 
-                $('#productQuantity').text(currentValue);
-                $('#productPrice').text(`₹ ${productPrice * currentValue}`)
+                updateCartItem("increase", function (success) {
+                    if (success) {
+                        $('#productQuantity').text(currentValue);
+                        $('#productPrice').text(`₹ ${productPrice * currentValue}`);
+                    }
+                });
             })
 
             $('#addToCartBtn').click(() => {
 
                 const btn = $('#addToCartBtn');
                 const cart = {
-                    ProductID: @Model.ProductId,
+                    ProductID: @Model.Product.ProductId,
                     Quantity: currentValue,
-                    Price: @Model.price
+                    Price: @Model.Product.price
                 };
 
                 btn.prop('disabled', true);
@@ -130,6 +153,8 @@
                     contentType: 'application/json',
                     success: function (response) {
                         if (response.success) {
+                            $('#cartItemCount').text(response.cartItemCount)
+                            isProductPresent = true;
                             disableBtn();
                         } else {
                             btn.prop('disabled', false);;
@@ -143,6 +168,31 @@
                 });
             })
 
+            function updateCartItem(updateType, callback) {
+                if (isProductPresent) {
+                    let quantity = currentValue;
+
+                    if (updateType !== 'decrease' || quantity >= 1) {
+                        $.post('/Cart/UpdateItem', { cartId: cartItemId, type: updateType }, function (html) {
+                            if (html) {
+                                showToast("Updated", "Cart Updated", "bg-success");
+                                callback(true);
+                            } else {
+                                showToast("Error", "Cart Update Error", "bg-danger");
+                                callback(false);
+                            }
+                        }).fail(function () {
+                            showToast("Error", "Server Error", "bg-danger");
+                            callback(false);
+                        });
+                    } else {
+                        callback(false);
+                    }
+                } else {
+                    callback(true);
+                }
+            }
+
               $.get('@Url.Action("LoadHeader", "Home")', { isCart: false}, function (data) {
                     $('#dynamicHeaderContent').html(data);
                 });
@@ -153,6 +203,14 @@
                 btn.prop('disabled', true);
                 btn.text('Item in Cart');
                 btn.addClass('btn-secondary');
+            }
+
+            function showToast(title, message, bgClass) {
+                $('#toastElement').removeClass('bg-success bg-danger bg-warning').addClass(bgClass);
+                $('#toastHead').text(title);
+                $('#toastBody').text(message);
+
+                toast.show();
             }
     });
     </script>
