@@ -44,14 +44,18 @@
                 <form class="d-flex ms-4 me-5 px-2 justify-content-between align-items-center">
                     @if (!isCart)
                     {
-                        <div style="position: relative;">
+                        <div style="position: relative; cursor: pointer">
                             <a class="d-block text-decoration-none" href="@Url.Action("Index","Cart")">
                                 <i class="fa-solid fa-cart-shopping" style="font-size: 30px; color: white"></i>
                             </a>
-                            @if (Model.CartItemsCount > 0)
-                            {
-                                <h6 id="cartItemCount" style="position: absolute; top: -2px; right: 38%">@Model.CartItemsCount</h6>
-                            }
+                           
+                            <h6 id="cartItemCount" style="position: absolute; top: -2px; right: 38%">
+                                @if (Model.CartItemsCount > 0)
+                                {
+                                    @(Model.CartItemsCount)
+                                }
+                            </h6>
+                           
                         </div>
                     }
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">

@@ -40,7 +40,7 @@ namespace Ecommerce_API.Controllers
 
             if(result != 0)
             {
-                return Ok(new { success = true, message = "Item Added to Cart" });
+                return Ok(new { success = true, message = "Item Added to Cart", cartItemId = result });
             }
             else
             {

@@ -31,5 +31,40 @@ namespace Ecommerce_Application.Controllers
             }
             return Json(new {success = false}); ;
         }
+
+        [HttpPost]
+        public async Task<JsonResult> ChangePassword(int UserId, string OldPassword, string NewPassword)
+        {
+            if (ModelState.IsValid)
+            {
+                bool result = await profileServices.ChangePassword(UserId, OldPassword, NewPassword, Request.Cookies["Token"].Value.ToString());
+                return Json(new { success = result });
+            }
+            return Json(new { success = false }); ;
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> UpdateUserImg()
+        {
+            try
+            {
+                var file = Request.Files["file"];
+                int userId = Convert.ToInt32(Request.Form["userId"]);
+                string imgPath = await profileServices.UpdateUserProfileImg(userId, Request.Cookies["Token"].Value, file);
+                if (imgPath != null)
+                {
+                    return Json(new { success = true, imgPath = imgPath });
+                }
+                else
+                {
+                    return Json(new { success = false });
+                }
+            }
+            catch(Exception ex)
+            {
+                Debug.WriteLine("error = " + ex.Message);
+                throw;
+            }
+        }
     }
 }

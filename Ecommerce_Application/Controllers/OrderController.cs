@@ -19,6 +19,8 @@ namespace Ecommerce_Application.Controllers
             int userID = Convert.ToInt32(Session["UserId"] ?? 3);
             ProfileServices profileServices = new ProfileServices();
             UserModel userDetails = await profileServices.GetUserDetails(userID, Request.Cookies["Token"].Value.ToString());
+            List<string> previousAdderss = await profileServices.GetPreviousAddress(userID, Request.Cookies["Token"].Value);
+            userDetails.PreviousAddress = previousAdderss;
             return View(userDetails);
         }
 

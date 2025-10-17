@@ -29,9 +29,9 @@ namespace Ecommerce_Application.Controllers
         {
             int userId = Convert.ToInt32(Session["UserId"] ?? 3);
             cartModel.CustomerID = userId;
-            var result = await cartServices.AddToCart(cartModel, Request.Cookies["Token"].Value.ToString());
+            int newCartId = await cartServices.AddToCart(cartModel, Request.Cookies["Token"].Value.ToString());
             List<CartModel> cartItems = await cartServices.ViewCartItems(Request.Cookies["Token"].Value, userId);
-            return Json(new {success = result, cartItemCount = cartItems.Count});
+            return Json(new { newCartItem = newCartId, cartItemCount = cartItems.Count});
         }
 
         [HttpPost]

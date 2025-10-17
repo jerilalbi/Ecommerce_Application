@@ -152,9 +152,13 @@
                     data: JSON.stringify(cart),
                     contentType: 'application/json',
                     success: function (response) {
-                        if (response.success) {
+                        if (response.newCartItem != 0) {
                             $('#cartItemCount').text(response.cartItemCount)
+                            var testval = $('#cartItemCount').val();
+                            console.log(testval);
+
                             isProductPresent = true;
+                            cartItemId = response.newCartItem;
                             disableBtn();
                         } else {
                             btn.prop('disabled', false);;

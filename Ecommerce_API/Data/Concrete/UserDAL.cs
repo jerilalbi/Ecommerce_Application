@@ -1,15 +1,18 @@
 ﻿using Ecommerce_API.Models;
+using Microsoft.Ajax.Utilities;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading;
 using System.Web;
+using System.Web.Mvc;
 using System.Web.UI.WebControls;
 
 namespace Ecommerce_API.Data.Concrete
@@ -125,6 +128,7 @@ namespace Ecommerce_API.Data.Concrete
                                 Email = Convert.ToString(reader["email"]),
                                 Address = Convert.ToString(reader["address"]),
                                 Phone = Convert.ToString(reader["phone"]),
+                                ImgUrl = Convert.ToString(reader["ProfileImg"]),
                             };
                     }
                     else
@@ -162,6 +166,84 @@ namespace Ecommerce_API.Data.Concrete
             }
         }
 
+        public string UpdateUserProfileImg(int userId, HttpPostedFile file)
+        {
+            try
+            {
+                if(file == null || file.ContentLength == 0)
+                {
+                    throw new ArgumentException("No file uploaded");
+                }
+
+                string folderPath = HttpContext.Current.Server.MapPath("~/Uploads/ProfileImages/");
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+
+                string fileExtension = Path.GetExtension(file.FileName);
+                string fileName = $"user_{userId}{fileExtension}";
+                string fullPath = Path.Combine(folderPath, fileName);
+                string relativePath = "/Uploads/ProfileImages/" + fileName;
+
+                if (File.Exists(fullPath))
+                {
+                    File.Delete(fullPath);
+                }
+
+                file.SaveAs(fullPath);
+
+                string storedProcedure = "UpdateUserProfileImg";
+
+                return ExecuteSQL(storedProcedure, cmd =>
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    int result = cmd.ExecuteNonQuery();
+                    if(result != 0)
+                    {
+                        return relativePath;
+                    }
+                    else
+                    {
+                        return "";
+                    }
+                },
+                new SqlParameter("@UserId", userId),
+                new SqlParameter("@ImgPath", relativePath)
+                );
+
+            }
+            catch (Exception ex)
+            {
+                Logger.log(ex);
+                throw ex;
+            }
+        }
+
+        public List<string> GetPerviousAddress(int userId)
+        {
+            try
+            {
+                string storedProcedure = "PreviousAddress";
+                return ExecuteSQL(storedProcedure, cmd =>
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    List<string> previousAddress = new List<string>();
+                    using (SqlDataReader reader = cmd.ExecuteReader()) {
+                        while (reader.Read())
+                        {
+                            previousAddress.Add(Convert.ToString(reader["address"]));
+                        }
+                        return previousAddress;
+                    }
+                }, new SqlParameter("@UserId", userId));
+            }
+            catch (Exception ex) {
+                Logger.log(ex);
+                throw ex;
+            }
+        }
+
         public int deleteAccount(UserModel userModel)
         {
             try
@@ -190,6 +272,65 @@ namespace Ecommerce_API.Data.Concrete
             {
                 Logger.log(ex);
                 throw ex;
+            }
+        }
+
+        private PasswordModel GetPasswordHash(int userId)
+        {
+            try
+            {
+                string storedProcedure = "GetPasswordHash";
+                return ExecuteSQL(storedProcedure, cmd =>
+                {
+                cmd.CommandType = CommandType.StoredProcedure;
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read()) {
+                            return new PasswordModel { 
+                                PasswordHash = Convert.ToString(reader["PasswordHash"]),
+                                PasswordSalt = Convert.ToString(reader["PasswordSalt"])
+                            };
+                        }
+                    }
+                    return null;
+                }, new SqlParameter("@UserId", userId));
+            }
+            catch (Exception ex) {
+                Logger.log(ex);
+                throw ex;
+            }
+        }
+
+        public int ChangePassword(string oldPassword, string newPassword, int userId)
+        {
+            PasswordHelper passwordHelper = new PasswordHelper();
+            PasswordModel password = GetPasswordHash(userId);
+            if(password != null)
+            {
+                bool isPasswordMatch = passwordHelper.verifyPasswordHash(oldPassword, password.PasswordHash, password.PasswordSalt);
+
+                if (isPasswordMatch) {
+                    (string passwordHash, string passwordSalt) = passwordHelper.createPasswordHash(newPassword);
+                    string storedProcedure = "ChangePassword";
+
+                    return ExecuteSQL(storedProcedure, cmd =>
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        return cmd.ExecuteNonQuery();
+                    }, 
+                    new SqlParameter("@UserId", userId),
+                    new SqlParameter("@PasswordHash", passwordHash),
+                    new SqlParameter("@PasswordSalt", passwordSalt)
+                    );
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            else
+            {
+                return 0;
             }
         }
     }

@@ -14,5 +14,6 @@ namespace Ecommerce_API.Models
         public string Address { get; set; }
         public string Token { get; set; }
         public string Role { get; set; }
+        public string ImgUrl { get; set; }
     }
 }

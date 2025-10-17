@@ -57,7 +57,11 @@ namespace Ecommerce_API.Data.Concrete
                 return ExecuteSQL(storedProcedure, cmd =>
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    return cmd.ExecuteNonQuery();
+                    object cartId =  cmd.ExecuteScalar();
+                    if (cartId != null && cartId != DBNull.Value) { 
+                        return Convert.ToInt32(cartId);
+                    }
+                    return 0;
                 },
                 new SqlParameter("@customerID",cart.CustomerID),
                 new SqlParameter("@productID",cart.ProductID),

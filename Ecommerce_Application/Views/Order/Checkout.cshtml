@@ -15,11 +15,47 @@
         body {
             background-color: #FFF7DD;
         }
+
+        .scroll-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding: 10px;
+            scroll-behavior: smooth;
+            max-width: 350px;
+            white-space: nowrap;
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .address-box {
+            flex-shrink: 0;
+            height: 80px;
+            width: 300px;
+            background-color: #91C4C3;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-right: 8px;
+        }
+
+        .text-ellipsis {
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3; 
+            white-space: normal;
+            padding: 5px;
+        }
+
     </style>
 </head>
 <body>
     <div class="d-flex justify-content-center align-items-center vh-100">
-        <div class="p-4 rounded-4" style="background-color: #B4DEBD; width: 500px">
+        <div class="p-4 rounded-4" style="background-color: #B4DEBD; width: 500px; overflow: hidden">
             @if (String.IsNullOrEmpty(Model.Address))
             {
                 <h4>No Address Present !</h4>
@@ -37,6 +73,23 @@
                         <td>
                             <textarea id="newAddress" class="form-control form-control-lg" rows="4" style="width: 350px"></textarea> <br />
                             <p id="validatorAddress" style="color: red; display: none">Add Address</p>
+                            @if (Model.PreviousAddress.Count > 0)
+                            {
+                                <h6>Previous Address</h6>
+                                <div id="previousAddressSec" class="mt-2 mb-2 scroll-container">
+                                    @foreach (string address in Model.PreviousAddress)
+                                    {
+                                        <div class="d-flex address-box">
+                                            <div class="p-3 d-flex align-items-center justify-content-center">
+                                                <input style="height: 30px; width: 30px;" class="form-check-input" type="radio" name="addressRadio" value="@address">
+                                            </div>
+                                            <h5 class="text-ellipsis m-0 flex-grow-1">
+                                                @address
+                                            </h5>
+                                        </div>
+                                    }
+                                </div>
+                            }
                             <button id="cancelBtn" class="btn mt-1" type="submit" style="background-color: #FFF7DD; color: black !important ">Cancel</button>
                         </td>
                     </tr>
@@ -119,9 +172,15 @@
             $('#proceedBtn').click(function () {
 
                 if (isNewAddress) {
-                    if ($('#newAddress').val().trim() != "") {
+                    const selectedAddress = $('input[name="addressRadio"]:checked').val();
+
+                    if ($('#newAddress').val().trim() != "" || selectedAddress) {
                         $('#validatorAddress').hide();
-                        address = $('#newAddress').val().trim();
+                        if ($('#newAddress').val().trim() == "") {
+                            address = selectedAddress;
+                        } else {
+                            address = $('#newAddress').val().trim();
+                        }
                     } else {
                         address = '@Model.Address'
                         $('#validatorAddress').show();

@@ -13,12 +13,18 @@ namespace Ecommerce_Application.Services
 {
     public class CartServices : APIHelper
     {
-        public Task<bool> AddToCart(CartModel cart,string token)
+        public Task<int> AddToCart(CartModel cart,string token)
         {
             return CallAPI(async client =>
             {
                 var response = await client.PostAsJsonAsync("cart/addItem", cart);
-                return response.IsSuccessStatusCode;
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    JObject jsonObject = JObject.Parse(json);
+                    return jsonObject["cartItemId"].Value<int>();
+                }
+                return 0;
             },token);
         }
 

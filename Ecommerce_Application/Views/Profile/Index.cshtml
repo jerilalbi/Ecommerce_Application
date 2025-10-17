@@ -15,6 +15,25 @@
         body {
             background-color: #FFF7DD;
         }
+
+        .profile-edit {
+            height: 50px;
+            width: 50px;
+            border-radius: 50px;
+            background-color: #80A1BA;
+            position: absolute;
+            top: 0;
+            right: 15px;
+            cursor: pointer;
+        }
+
+        .hidden-file-input {
+            opacity: 0;
+            position: absolute;
+            z-index: -1;
+            width: 0.1px;
+            height: 0.1px;
+        }
     </style>
 </head>
 <body>
@@ -24,7 +43,15 @@
     </header>
     <div class="w-100 p-3" style="background-color: #91C4C3; height: 250px; margin-top: 70px;">
         <div class="h-100 ms-4 d-flex" style="width: 500px; ">
-            <img src="https://www.shutterstock.com/image-vector/universal-blank-profile-picture-avatar-600nw-1654275940.jpg" alt="Circular Image" class="rounded-circle" style="width: 200px; height: 200px;" />
+            <div style="position: relative;">
+                <img id="profileImgTag" src="@Model.FullUrl" alt="Profile Image" class="rounded-circle" style="width: 200px; height: 200px;" />
+                <div class="d-flex align-items-center justify-content-center profile-edit">
+                    <input class="hidden-file-input" type="file" id="profileImg" name="ProfileImage" accept=".jpg,.jpeg,.png" />
+                    <label for="profileImg" style="cursor: pointer" class="custom-file-label">
+                        <i class="fa-solid fa-pen" style="font-size: 25px"></i>
+                    </label>
+                </div>
+            </div>
             <div class="d-flex flex-column justify-content-center p-3" style="width: 300px;">
                 <h2>@Model.Name</h2>
                 <h4>@Model.Email</h4>
@@ -50,23 +77,66 @@
         <button id="updateAddressBtn" class="btn mt-3" type="button" style="background-color: #91C4C3 ">@(String.IsNullOrEmpty(Model.Address) ? "Add Address" : "Update Address")</button>
 
     </div>
+    <div class="p-4">
+        <h3>Change Password:</h3>
 
-        <div id="toast" style="visibility: hidden" class="toast-container position-fixed bottom-0 end-0 p-3">
-            <div id="toastBody" class="toast show bg-success text-white">
-                <div class="toast-header">
-                    <strong id="toastTitle" class="me-auto">Updated</strong>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-                </div>
-                <div id="toastMsg" class="toast-body">
-                    User Address Updated
-                </div>
+        <table>
+            <tr>
+                <td>
+                    <label>Old Password:</label>
+                    <input type="password" id="oldPasswordTxt" class="form-control form-control-lg" />
+                </td>
+                <td>
+                    <h6 id="oldPasswordError" style="color: red; display: none">Enter Old Password</h6>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>New Password:</label>
+                    <input type="password" id="newPasswordTxt" class="form-control form-control-lg" />
+                </td>
+                <td>
+                    <h6 id="newPasswordError" style="color: red; display: none">Enter New Password</h6>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Confirm Password:</label>
+                    <input type="password" id="confirmNewPasswordTxt" class="form-control form-control-lg" />
+                </td>
+                <td>
+                    <h6 id="confirmPasswordError" style="color: red; display: none">Password Must be Same</h6>
+                </td>
+            </tr>
+        </table>
+
+
+        <button id="changePasswordBtn" class="btn mt-3" type="button" style="background-color: #91C4C3 ">Change Password</button>
+
+    </div>
+
+    <div id="toastMsg" class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toastElement" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong id="toastHead" class="me-auto"></strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div id="toastBody" class="toast-body">
+
             </div>
         </div>
+    </div>
 
     <script src="~/Scripts/bootstrap.bundle.min.js"></script>
     <script src="~/Scripts/jquery-3.7.0.min.js"></script>
     <script>
         $(document).ready(function () {
+
+            const toastElement = $('#toastElement');
+            const toast = new bootstrap.Toast(toastElement, {
+                autohide: true,
+                delay: 5000
+            });
 
             $('#updateAddressBtn').click(function () {
                 const btn = $(this);
@@ -95,22 +165,13 @@
                     },
                     success: (response) => {
                         if (response.success === true) {
-                            $('#toastBody').removeClass('bg-danger'); 
-                            $('#toast').css('visibility', 'visible')
-                            $('#toastMsg').text('User Address Updated')
-                            $('#toastTitle').text('Updated')
+                            showToast("Updated","User Address Updated","bg-success")
                         } else {
-                            $('#toast').css('visibility', 'visible')
-                            $('#toastBody').addClass('bg-danger')
-                            $('#toastMsg').text('User Address Not Updated')
-                            $('#toastTitle').text('Not Updated')
+                            showToast("Not Updated", `User Address Not Updated`, "bg-danger")
                         }
                     },
                     error: (xhr, status, error) => {
-                        $('#toast').css('visibility', 'visible')
-                        $('#toastBody').addClass('bg-danger')
-                        $('#toastMsg').text(error)
-                        $('#toastTitle').text('Not Updated')
+                        showToast("Not Updated", `${error}`, "bg-danger")
                     },
                     complete: () => {
                         btn.prop('disabled', false).text('Update Address');
@@ -118,9 +179,116 @@
                 })
             })
 
+            $('#profileImg').on('change', function () {
+                var imgInput = this;
+
+                var file = imgInput.files[0];
+
+                var formData = new FormData();
+                formData.append("file", file);
+                formData.append("userId", @Model.UserId);
+
+
+                $.ajax({
+                    url: '@Url.Action("UpdateUserImg", "Profile")',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        console.log(response)
+                        if (response.success === true) {
+                            const timestamp = new Date().getTime();
+                            const newImgSrc = `http://localhost:60${response.imgPath}?v=${timestamp}`
+                            $('#profileImgTag').attr('src', newImgSrc);
+                            showToast("Image Updated", `Profile Image Updated`, "bg-success")
+                        } else {
+                            showToast("Not Updated", `Profile Image Not Updated`, "bg-danger")
+                        }
+                    },
+                    error: function (error) {
+                        showToast("Error", `Server Error`, "bg-danger")
+                    }
+                })
+
+            })
+
+            $('#changePasswordBtn').click(function () {
+                const btn = $(this);
+
+                const userId = $('#userIdInput').val();
+                const oldPassword = $('#oldPasswordTxt').val();
+                const newPassword = $('#newPasswordTxt').val();
+
+                if (!validateForms()) { return; }
+
+                btn.prop('disabled', true).text('Saving...');
+                $.ajax({
+                    url: '@Url.Action("ChangePassword", "Profile")',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        UserId: userId,
+                        OldPassword: oldPassword,
+                        NewPassword: newPassword
+                    },
+                    success: (response) => {
+                        if (response.success === true) {
+                            showToast("Updated","Password Updated","bg-success")
+                        } else {
+                            showToast("Not Updated", `Password Not Updated`, "bg-danger")
+                        }
+                    },
+                    error: (xhr, status, error) => {
+                        showToast("Not Updated", `Error`, "bg-danger")
+                    },
+                    complete: () => {
+                        btn.prop('disabled', false).text('Change Password');
+                    }
+                })
+            })
+
+
             $.get('@Url.Action("LoadHeader", "Home")', { isCart: false}, function (data) {
             $('#dynamicHeaderContent').html(data);
-             });
+            });
+
+            function validateForms() {
+                const oldPassword = $('#oldPasswordTxt').val()
+                const newPassword = $('#newPasswordTxt').val()
+                const confirmNewPassword = $('#confirmNewPasswordTxt').val()
+
+                if (oldPassword.trim() === "") {
+                    $("#oldPasswordError").show()
+                    return false;
+                } else {
+                    $("#oldPasswordError").hide()
+                }
+
+                if (newPassword.trim() === "") {
+                    $("#newPasswordError").show()
+                    return false;
+                } else {
+                    $("#newPasswordError").hide()
+                }
+
+                if (confirmNewPassword.trim() != newPassword.trim()) {
+                    $("#confirmPasswordError").show()
+                    return false;
+                } else {
+                    $("#confirmPasswordError").hide()
+                }
+
+                return true;
+            }
+
+            function showToast(title, message, bgClass) {
+                $('#toastElement').removeClass('bg-success bg-danger bg-warning').addClass(bgClass);
+                $('#toastHead').text(title);
+                $('#toastBody').text(message);
+
+                toast.show();
+            }
     });
     </script>
 </body>
