@@ -26,12 +26,14 @@ namespace Ecommerce_Application.Controllers
             }
 
             UserModel user = await userServices.loginUser(login, this.HttpContext);
+            Debug.WriteLine($"user = {user.Role}");
 
             if (user != null)
             {
                 Session["UserId"] = user.UserId;
+                Session["Role"] = user.Role;
 
-                if(user.Role == "admin")
+                if(user.Role == "admin" || user.Role == "super-admin")
                 {
                     return RedirectToAction("Index","Admin");
                 }else if(user.Role == "user")

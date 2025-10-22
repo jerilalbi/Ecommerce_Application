@@ -215,5 +215,23 @@ namespace Ecommerce_Application.Services
                 throw;
             }
         }
+
+        public Task<bool> DemoteAdmin(string email, string token)
+        {
+            try
+            {
+                return CallAPI(async client =>
+                {
+                    var body = new { Email = email };
+                    var response = await client.PutAsJsonAsync($"admin/demoteAdmin", body);
+                    return response.IsSuccessStatusCode;
+                }, token);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                throw;
+            }
+        }
     }
 }

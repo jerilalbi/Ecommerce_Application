@@ -12,7 +12,7 @@ using System.Web.Mvc;
 
 namespace Ecommerce_Application.Controllers
 {
-    [JWTAuthorize(Role = "admin")]
+    [JWTAuthorize(Role = "admin,super-admin")]
     public class AdminController : Controller
     {
         protected readonly AdminServices adminServices = new AdminServices();
@@ -49,7 +49,11 @@ namespace Ecommerce_Application.Controllers
         public async Task<ActionResult> Users()
         {
             List<UserModel> users = await adminServices.GetAllUsers(Request.Cookies["Token"].Value);
-            return PartialView("_Users",users);
+            AllUserModel allUsers = new AllUserModel { 
+                Users = users.Where(usr => usr.Role == "user").ToList(),
+                Admins = users.Where(usr => usr.Role == "admin").ToList(),
+            };
+            return PartialView("_Users",allUsers);
         }
 
         public async Task<JsonResult> GetSales()
@@ -152,20 +156,34 @@ namespace Ecommerce_Application.Controllers
             product.quantity = productStock;
             product.imgUrl = imgUrl;
 
-            bool isProductAdded = await adminServices.UpdateProduct(product, Request.Cookies["Token"].Value, file);
-            return Json(new { success = isProductAdded, });
+            bool isProductUpdated = await adminServices.UpdateProduct(product, Request.Cookies["Token"].Value, file);
+            return Json(new { success = isProductUpdated, });
         }
 
         public async Task<JsonResult> DeleteProduct(int productId, string imgUrl)
         {
-            bool isProductAdded = await adminServices.DeleteProduct(productId, imgUrl, Request.Cookies["Token"].Value);
-            return Json(new { success = isProductAdded, });
+            bool isProductDeleted = await adminServices.DeleteProduct(productId, imgUrl, Request.Cookies["Token"].Value);
+            return Json(new { success = isProductDeleted, });
         }
 
-        public async Task<JsonResult> MakeAdmin(string email)
+        public async Task<ActionResult> MakeAdmin(string email)
         {
-            bool isProductAdded = await adminServices.MakeAdmin(email, Request.Cookies["Token"].Value);
-            return Json(new { success = isProductAdded, });
+            bool isUserAdmin = await adminServices.MakeAdmin(email, Request.Cookies["Token"].Value);
+
+            if (isUserAdmin) {
+                return await Users();
+            }
+
+            return Json(new { success = isUserAdmin, });
+        }
+
+        public async Task<ActionResult> DemoteAdmin(string email)
+        {
+            bool isUserDemoted = await adminServices.DemoteAdmin(email, Request.Cookies["Token"].Value);
+            if (isUserDemoted) {
+                return await Users();
+            }
+            return Json(new { success = isUserDemoted, });
         }
     }
 }

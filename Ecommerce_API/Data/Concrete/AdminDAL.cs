@@ -191,6 +191,26 @@ namespace Ecommerce_API.Data.Concrete
             }
         }
 
+        public int demoteAdmin(AllUserModel userModel)
+        {
+            try
+            {
+                string storedProcedure = "DemoteAdmin";
+                return ExecuteSQL(storedProcedure, cmd =>
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    return cmd.ExecuteNonQuery();
+                },
+                new SqlParameter("@email", userModel.Email)
+                );
+            }
+            catch (Exception ex)
+            {
+                Logger.log(ex);
+                throw ex;
+            }
+        }
+
         public int deleteUser(AllUserModel userModel)
         {
             try

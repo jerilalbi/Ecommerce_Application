@@ -31,8 +31,10 @@ namespace Ecommerce_Application.Filters
 
                 if (!string.IsNullOrEmpty(Role))
                 {
+
+                    var allowedRoles = Role.Split(',').Select(r => r.Trim()).ToList();
                     var roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
-                    if (roleClaim == null || roleClaim.Value != Role)
+                    if (roleClaim == null || !allowedRoles.Contains(roleClaim.Value,StringComparer.OrdinalIgnoreCase) )
                     {
                         return false;
                     }

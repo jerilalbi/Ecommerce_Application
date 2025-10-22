@@ -3,7 +3,6 @@ using Ecommerce_API.Models;
 using Microsoft.Ajax.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -13,7 +12,7 @@ using System.Web.Http;
 
 namespace Ecommerce_API.Controllers
 {
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = "admin,super-admin")]
     [RoutePrefix("api/admin")]
     public class AdminController : ApiController
     {
@@ -79,6 +78,24 @@ namespace Ecommerce_API.Controllers
             else
             {
                 return BadRequest("User not Updated");
+            }
+        }
+
+        [HttpPut]
+        [Authorize(Roles = "super-admin")]
+        [Route("demoteAdmin")]
+        public IHttpActionResult DemoteAdmin([FromBody] AllUserModel userModel)
+        {
+            AdminDAL adminDAL = new AdminDAL();
+            int result = adminDAL.demoteAdmin(userModel);
+
+            if (result != 0)
+            {
+                return Ok(new { success = true, message = "Admin Demoted" });
+            }
+            else
+            {
+                return BadRequest("Admin not Demoted");
             }
         }
 
@@ -160,7 +177,6 @@ namespace Ecommerce_API.Controllers
                 var file = httpRequest.Files["imgFile"];
                 if(file != null && file.ContentLength > 0)
                 {
-                    Trace.WriteLine("File uploaded: " + imgUrl);
                     string uploadsFolder = HttpContext.Current.Server.MapPath("~/Uploads/ProductImages/");
 
                     if (!imgUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
@@ -261,5 +277,7 @@ namespace Ecommerce_API.Controllers
                 return BadRequest("Error");
             }
         }
+
+
     }
 }

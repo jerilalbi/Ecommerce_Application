@@ -1,44 +1,115 @@
-﻿@model List<Ecommerce_Application.Models.UserModel>
+﻿@model Ecommerce_Application.Models.AllUserModel
+
+@{ 
+    string userRole = Session["Role"] as string;
+}
+
+    
+<style>
+    .tabBtns {
+        background-color: #FFF7DD;
+        min-width: 150px;
+        max-width: 250px;
+        min-height: 150px;
+        border-radius: 10px;
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    .tabBtns.btnActive {
+        border: 2px solid black;
+    }
+</style>
 <div id="userContent">
     <section style="background-color: #91C4C3; width: 100%; min-height: 100vh; padding: 15px">
         <div>
-            <h3> All Users</h3>
-            <div style="margin-top: 15px">
-                @if (Model != null)
-                {
-                    if (Model.Count > 0)
-                    {
-                        <div style="box-shadow: 5px 5px 7px white; border-radius: 10px">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Email</th>
-                                        <th scope="col">Role</th>
-                                        <th scope="col">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="orderTableBody">
-                                    @foreach (var user in Model)
-                                    {
-                                        <tr>
-                                            <td>@user.Name</td>
-                                            <td>@user.Email</td>
-                                            <td>@user.Role</td>
-                                            <td><button type="button" id="makeAdminBtn" onclick="openMakeAdminModel('@user.Email','@user.Name')" class="btn btn-danger">Make Admin</button></td>
-                                        </tr>
-                                    }
+            <div class="d-flex">
+                <div id="usersTabBtn" class="d-flex justify-content-center flex-column tabBtns btnActive">
+                    <h4>Users:</h4>
+                    <h2>@Model.Users.Count</h2>
+                </div>
 
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <h3>No Users</h3>
-                    }
+                @if(!string.IsNullOrWhiteSpace(userRole) && userRole.Equals("super-admin", StringComparison.OrdinalIgnoreCase)){
+                    <div id="adminTabBtn" class="d-flex justify-content-center flex-column ms-2 tabBtns">
+                        <h4>Admin:</h4>
+                        <h2>@Model.Admins.Count</h2>
+                    </div>
                 }
 
+            </div>
+            <div style="margin-top: 15px">
+                <div id="usersSec">
+                    @if (Model != null)
+                    {
+                        if (Model.Users.Count > 0)
+                        {
+                            <div style="box-shadow: 5px 5px 7px white; border-radius: 10px">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Email</th>
+                                            <th scope="col">Role</th>
+                                            <th scope="col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var user in Model.Users)
+                                        {
+                                            <tr>
+                                                <td>@user.Name</td>
+                                                <td>@user.Email</td>
+                                                <td>@user.Role</td>
+                                                <td><button type="button" id="makeAdminBtn" onclick="window.openMakeAdminModel('@user.Email','@user.Name')" class="btn btn-danger">Make Admin</button></td>
+                                            </tr>
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <h3>No Users</h3>
+                        }
+                    }
+                </div>
+                <div style="display: none" id="adminSec">
+                    @if (Model != null)
+                    {
+                        if (Model.Admins.Count > 0)
+                        {
+                            <div style="box-shadow: 5px 5px 7px white; border-radius: 10px">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Email</th>
+                                            <th scope="col">Role</th>
+                                            <th scope="col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var user in Model.Admins)
+                                        {
+                                            <tr>
+                                                <td>@user.Name</td>
+                                                <td>@user.Email</td>
+                                                <td>@user.Role</td>
+                                                <td><button type="button" id="demoteAdminBtn" onclick="window.openMakeAdminModel('@user.Email','@user.Name')" class="btn btn-danger">Demote Admin</button></td>
+                                            </tr>
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <h3>No Users</h3>
+                        }
+                    }
+                </div>
             </div>
 
         </div>
@@ -50,7 +121,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Promotion</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div id="modelBody" class="modal-body">
@@ -58,55 +129,68 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" onclick="makeAdmin()" id="confirmBtn" class="btn btn-danger">Yes</button>
+                <button type="button" id="confirmBtn" class="btn btn-danger">Yes</button>
             </div>
         </div>
     </div>
 </div>
 
-<div id="toastMsg" class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div id="toastElement" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <strong id="toastHead" class="me-auto">Success</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div id="toastBody" class="toast-body">
-            Admin Access Given
-        </div>
-    </div>
-</div>
-
 <script>
-    let userEmail = null;
-    const toastElement = $('#toastElement');
-    const toast = new bootstrap.Toast(toastElement, {
-        autohide: true,
-        delay: 5000
-    });
+    (function () {
+        let userEmail = null;
+        let operation = "user";
 
-    function openMakeAdminModel(email, name) {
-        userEmail = email;
-        $("#modelBody").text(`Are you sure. Make ${name} as Admin ?`)
-        const adminModal = new bootstrap.Modal($('#makeAdminModal'));
-        adminModal.show();
-    }
+        const makeAdminModalElement = document.getElementById('makeAdminModal');
+        const adminModal = new bootstrap.Modal(makeAdminModalElement);
 
-    function makeAdmin() {
-        $.post('/Admin/MakeAdmin', { email: userEmail }, (data) => {
-            if (data.success) {
-                showToast("Success", "Admin Access Give", "bg-success")
+
+        $('#usersTabBtn').click(() => {
+            $('#usersTabBtn').addClass('btnActive');
+            $('#adminTabBtn').removeClass('btnActive');
+
+            operation = "user";
+            $('#adminSec').hide()
+            $('#usersSec').show();
+        })
+
+        $('#adminTabBtn').click(() => {
+            $('#adminTabBtn').addClass('btnActive');
+            $('#usersTabBtn').removeClass('btnActive');
+
+            operation = "admin";
+            $('#usersSec').hide();
+            $('#adminSec').show();
+        })
+
+
+        window.openMakeAdminModel = function (email, name) {
+            userEmail = email;
+            const actionText = (operation === "user") ? "Admin" : "User";
+            $("#modelBody").text(`Are you sure you want to make ${name} an ${actionText}?`);
+            adminModal.show();
+        }
+
+        $('#confirmBtn').click(function () {
+            if (operation == "user") {
+                makeAdmin();
             } else {
-                showToast("Error", "Admin Access Failed", "bg-danger")
+                demoteAdmin();
             }
         })
-    }
 
-    function showToast(title, message, bgClass) {
-        $('#toastElement').removeClass('bg-success bg-danger bg-warning').addClass(bgClass);
-        $('#toastHead').text(title);
-        $('#toastBody').text(message);
+        function makeAdmin() {
+            $.post('/Admin/MakeAdmin', { email: userEmail }, (html) => {
+                    adminModal.hide();
+                    $("#userContent").html(html)
+            })
+        }
 
-        toast.show();
-    }
+        function demoteAdmin() {
+            $.post('/Admin/DemoteAdmin', { email: userEmail }, (html) => {
+                    adminModal.hide();
+                    $("#userContent").html(html)
+            })
+        }
+    })();
 </script>
 
