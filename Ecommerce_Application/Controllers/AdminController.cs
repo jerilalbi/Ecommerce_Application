@@ -21,7 +21,7 @@ namespace Ecommerce_Application.Controllers
             return View();
         }
 
-        public ActionResult Dashboard()
+        public  ActionResult Dashboard()
         {
             return PartialView("_Dashboard");
         }
@@ -34,7 +34,9 @@ namespace Ecommerce_Application.Controllers
         public async Task<ActionResult> Orders()
         {
             dynamic data = await adminServices.GetDeliveryOrders(Request.Cookies["Token"].Value);
-            List<DeliveryModel> orderData = JsonConvert.DeserializeObject<List<DeliveryModel>>(Convert.ToString(data));
+            List<AdminOrdersModel> allOrders = JsonConvert.DeserializeObject<List<AdminOrdersModel>>(Convert.ToString(data));
+            List<AdminOrdersModel> pendingOrderData = allOrders.Where(order => order.Status == "pending").ToList();
+            DeliveryModel orderData = new DeliveryModel { AllOrders = allOrders,PendingOrders = pendingOrderData };
             return PartialView("_Orders", orderData);
         }
 
@@ -111,21 +113,52 @@ namespace Ecommerce_Application.Controllers
             return PartialView("_Orders", orderData);
         }
 
-        public async Task<JsonResult> AddNewProduct(ProductModel product)
+        public async Task<JsonResult> AddNewProduct()
         {
-            bool isProductAdded = await adminServices.AddNewProduct(product, Request.Cookies["Token"].Value);
+            var file = Request.Files["file"];
+            string productName = Convert.ToString(Request.Form["ProductName"]);
+            string productCategory = Convert.ToString(Request.Form["ProductCategory"]);
+            int productPrice = Convert.ToInt32(Request.Form["Price"]);
+            int productStock = Convert.ToInt32(Request.Form["Quantity"]);
+
+            ProductModel product = new ProductModel();
+
+            product.ProductName = productName;
+            product.ProductCategory = productCategory;
+            product.price = productPrice;
+            product.quantity = productStock;
+
+            bool isProductAdded = await adminServices.AddNewProduct(product, Request.Cookies["Token"].Value, file);
             return Json(new { success = isProductAdded, });
         }
 
-        public async Task<JsonResult> UpdateProduct(ProductModel product)
+        public async Task<JsonResult> UpdateProduct()
         {
-            bool isProductAdded = await adminServices.UpdateProduct(product, Request.Cookies["Token"].Value);
+            var file = Request.Files["file"];
+
+            int productId = Convert.ToInt32(Request.Form["ProductId"]);
+            string productName = Convert.ToString(Request.Form["ProductName"]);
+            string productCategory = Convert.ToString(Request.Form["ProductCategory"]);
+            int productPrice = Convert.ToInt32(Request.Form["Price"]);
+            int productStock = Convert.ToInt32(Request.Form["Quantity"]);
+            string imgUrl = Convert.ToString(Request.Form["ImgUrl"]);
+
+            ProductModel product = new ProductModel();
+
+            product.ProductId = productId;
+            product.ProductName = productName;
+            product.ProductCategory = productCategory;
+            product.price = productPrice;
+            product.quantity = productStock;
+            product.imgUrl = imgUrl;
+
+            bool isProductAdded = await adminServices.UpdateProduct(product, Request.Cookies["Token"].Value, file);
             return Json(new { success = isProductAdded, });
         }
 
-        public async Task<JsonResult> DeleteProduct(int productId)
+        public async Task<JsonResult> DeleteProduct(int productId, string imgUrl)
         {
-            bool isProductAdded = await adminServices.DeleteProduct(productId, Request.Cookies["Token"].Value);
+            bool isProductAdded = await adminServices.DeleteProduct(productId, imgUrl, Request.Cookies["Token"].Value);
             return Json(new { success = isProductAdded, });
         }
 

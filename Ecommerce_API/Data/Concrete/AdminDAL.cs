@@ -5,6 +5,8 @@ using System.Linq;
 using System.Web;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
+using System.IO;
 
 namespace Ecommerce_API.Data.Concrete
 {
@@ -209,10 +211,27 @@ namespace Ecommerce_API.Data.Concrete
             }
         }
 
-        public int addProduct(ProductModel product)
+        public int addProduct(ProductModel product, HttpPostedFile file)
         {
             try
             {
+
+                string folderPath = HttpContext.Current.Server.MapPath("~/Uploads/ProductImages/");
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+                string fileExtension = Path.GetExtension(file.FileName);
+                string fileName = Guid.NewGuid().ToString() + fileExtension;
+                string filePath = Path.Combine(folderPath, fileName);
+                string relativePath = "/Uploads/ProductImages/" + fileName;
+
+                if(File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+                file.SaveAs(filePath);
+
                 string storedProcedure = "AddProduct";
                 return ExecuteSQL(storedProcedure, cmd =>
                 {
@@ -222,7 +241,7 @@ namespace Ecommerce_API.Data.Concrete
                 new SqlParameter("@category",product.ProductCategory),
                 new SqlParameter("@price", product.price),
                 new SqlParameter("@name", product.ProductName),
-                new SqlParameter("@img",product.imgUrl),
+                new SqlParameter("@img",relativePath),
                 new SqlParameter("@stock", product.quantity)
                 );
             }
@@ -258,7 +277,7 @@ namespace Ecommerce_API.Data.Concrete
             }
         }
 
-        public int deleteProduct(int productId)
+        public int deleteProduct(ProductModel product)
         {
             try
             {
@@ -268,7 +287,7 @@ namespace Ecommerce_API.Data.Concrete
                     cmd.CommandType = CommandType.StoredProcedure;
                     return cmd.ExecuteNonQuery();
                 },
-                new SqlParameter("@product_id", productId)
+                new SqlParameter("@product_id", product.ProductId)
                 );
             }
             catch (Exception ex)

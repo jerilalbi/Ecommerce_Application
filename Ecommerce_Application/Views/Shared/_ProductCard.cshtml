@@ -1,7 +1,7 @@
 ﻿@model Ecommerce_Application.Models.ProductModel
 <a class="d-block text-decoration-none text-dark" href="@Url.Action("Details","Product", new {id = Model.ProductId})">
     <div class="card flex-shrink-0" style="width: 10rem; cursor: pointer">
-        <img src="@Model.imgUrl" class="card-img-top" style="height: 150px;" alt="product_img">
+        <img src="@Model.ImgFullUrl" class="card-img-top" style="height: 150px;" alt="product_img">
         <div class="card-body" style="min-height: 110px">
             <h5 class="card-text">@Model.ProductName</h5>
             <h6 class="card-text">₹ @Model.price</h6>

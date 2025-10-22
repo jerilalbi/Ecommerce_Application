@@ -7,11 +7,7 @@ namespace Ecommerce_Application.Models
 {
     public class DeliveryModel
     {
-        public int DeliveryId { get; set; }
-        public string ProductName { get; set; }
-        public int Quantity { get; set; }
-        public string Name { get; set; }
-        public string Address { get; set; }
-        public string Status { get; set; }
+        public List<AdminOrdersModel> PendingOrders { get; set; }
+        public List<AdminOrdersModel> AllOrders { get; set; }
     }
 }

@@ -1,56 +1,152 @@
-﻿@model List<Ecommerce_Application.Models.DeliveryModel>
+﻿@model Ecommerce_Application.Models.DeliveryModel 
+
+<style>
+    .tabBtns {
+        background-color: #FFF7DD;
+        min-width: 150px;
+        max-width: 250px;
+        min-height: 150px;
+        border-radius: 10px;
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    .tabBtns.btnActive{
+        border: 2px solid black;
+    }
+
+</style>
+
 <div id="orderContent">
     <section style="background-color: #91C4C3; width: 100%; min-height: 100vh; padding: 15px">
         <div>
-            <div class="d-flex justify-content-center flex-column" style="background-color: #FFF7DD; min-width: 150px; max-width: 250px; min-height: 150px; border-radius: 10px; padding: 10px;">
-                <h4>No. Pending Orders:</h4>
-                <h2 id="orderCount">@((Model != null) ? @Model.Count : 0)</h2>
-            </div>
-            <div style="margin-top: 15px">
-                @if (Model != null)
-                {
-                    if (Model.Count > 0)
-                    {
-                        <div style="box-shadow: 5px 5px 7px white; border-radius: 10px">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">No.</th>
-                                        <th scope="col">Product</th>
-                                        <th scope="col">Quantity</th>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Address</th>
-                                        <th scope="col">Status</th>
-                                        <th scope="col">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="orderTableBody">
-                                    @for (var i = 0; i < Model.Count; i++)
-                                    {
-                                        var orders = Model[i];
-                                        <tr>
-                                            <td>@(i+1)</td>
-                                            <td>@orders.ProductName</td>
-                                            <td>@orders.Quantity</td>
-                                            <td>@orders.Name</td>
-                                            <td>@orders.Address</td>
-                                            <td>@orders.Status</td>
-                                            <td><button type="button" onclick="shipOrder(@orders.DeliveryId)" class="btn btn-success">Ship</button></td>
-                                        </tr>
-                                    }
-
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <h3>No Orders Left !</h3>
-                    }
-                }
-
+            <div class="d-flex">
+                <div id="pendingTabBtn" class="d-flex justify-content-center flex-column tabBtns btnActive">
+                    <h4>No. Pending Orders:</h4>
+                    <h2 id="orderCount">@((Model.PendingOrders != null) ? Model.PendingOrders.Count : 0)</h2>
+                </div>
+                <div id="allOrdersBtn" class="d-flex justify-content-center flex-column ms-2 tabBtns">
+                    <h4>No. All Orders:</h4>
+                    <h2 id="orderCount">@((Model.AllOrders != null) ? Model.AllOrders.Count : 0)</h2>
+                </div>
             </div>
 
+            <div class="tab-content">
+                <div id="pendingOrdersTab">
+                    <label class="mt-5 mb-3 me-3" style="font-size: 18px; font-weight: 700">Filter Product:</label>
+                    <select id="filterProductDropDown" class="form-control d-inline-block" style="width: 200px">
+                        <option value="">All</option>
+                        @foreach (var product in Model.PendingOrders.Select(ord => ord.ProductName).Distinct())
+                        {
+                            <option value="@product">@product</option>
+                        }
+                    </select>
+                    <label class="mt-5 mb-3 ms-3 me-3" style="font-size: 18px; font-weight: 700">Search Product:</label>
+                    <input id="searchTxt" type="text" class="form-control d-inline-block" style="width: 300px" />
+                    <div style="margin-top: 15px">
+                        @if (Model.PendingOrders != null)
+                        {
+                            if (Model.PendingOrders.Count > 0)
+                            {
+                                <div style="box-shadow: 5px 5px 7px white; border-radius: 10px">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Product</th>
+                                                <th scope="col">Quantity</th>
+                                                <th scope="col" id="sortByName" style="cursor: pointer">Name <i class="fa-solid fa-sort"></i> </th>
+                                                <th scope="col">Address</th>
+                                                <th scope="col">Status</th>
+                                                <th scope="col">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="pendingOrderTableBody">
+                                            @foreach (var orders in Model.PendingOrders)
+                                            {
+                                                <tr>
+                                                    <td>@orders.ProductName</td>
+                                                    <td>@orders.Quantity</td>
+                                                    <td>@orders.Name</td>
+                                                    <td>@orders.Address</td>
+                                                    <td>@orders.Status</td>
+                                                    <td><button type="button" data-id="@orders.DeliveryId" class="btn btn-success shipOrderBtn">Ship</button></td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="d-flex justify-content-end mt-3">
+                                    <div>
+                                        <button id="prevPage" class="btn me-2 text-white" style="background-color: #80A1BA"><i class="fa-solid fa-left-long"></i></button>
+                                        <span id="pageInfo"></span>
+                                        <button id="nextPage" class="btn ms-2 text-white" style="background-color: #80A1BA"><i class="fa-solid fa-right-long"></i></button>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <h3>No Orders Left !</h3>
+                            }
+                        }
+
+                    </div>
+                </div>
+                <div style="display: none" id="allOrdersTab">
+                    <label class="mt-5 mb-3 me-3" style="font-size: 18px; font-weight: 700">Filter Product:</label>
+                    <select id="filterStatusDropDown" class="form-control d-inline-block" style="width: 200px">
+                        <option value="">All</option>
+                        @foreach (var status in Model.AllOrders.Select(ord => ord.Status).Distinct())
+                        {
+                            <option value="@status">@status</option>
+                        }
+                    </select>
+                    <div style="margin-top: 15px">
+                        @if (Model.AllOrders != null)
+                        {
+                            if (Model.AllOrders.Count > 0)
+                            {
+                                <div style="box-shadow: 5px 5px 7px white; border-radius: 10px">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Product</th>
+                                                <th scope="col">Quantity</th>
+                                                <th scope="col">Name</th>
+                                                <th scope="col">Address</th>
+                                                <th scope="col">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="allOrderTableBody">
+                                            @foreach (var orders in Model.AllOrders)
+                                            {
+                                                <tr>
+                                                    <td>@orders.ProductName</td>
+                                                    <td>@orders.Quantity</td>
+                                                    <td>@orders.Name</td>
+                                                    <td>@orders.Address</td>
+                                                    <td>@orders.Status</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="d-flex justify-content-end mt-3">
+                                    <div>
+                                        <button id="prevPageAll" class="btn me-2 text-white" style="background-color: #80A1BA"><i class="fa-solid fa-left-long"></i></button>
+                                        <span id="pageInfoAll"></span>
+                                        <button id="nextPageAll" class="btn ms-2 text-white" style="background-color: #80A1BA"><i class="fa-solid fa-right-long"></i></button>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <h3>No Orders !</h3>
+                            }
+                        }
+
+                    </div>
+                </div>
+            </div>
         </div>
 
     </section>
@@ -58,10 +154,177 @@
 
 
 <script>
-    function shipOrder(id) {
-        $.post('/Admin/ShipOrder', { id: id }, (html) => {
-            $('#orderContent').html(html);
+    (function () {
+
+        let currentOrderPage = 1;
+        const rowsPerPage = 10;
+        let sortAsc = true;
+        let visiblePendingOrders;
+        let visibleAllOrders;
+
+        $(document).ready(function () {
+            visiblePendingOrders = $('#pendingOrderTableBody tr');
+            paginationTable(visiblePendingOrders);
+
+            $('#pendingTabBtn').click(() => {
+                $('#pendingTabBtn').addClass('btnActive');
+                $('#allOrdersBtn').removeClass('btnActive');
+
+                $('#allOrdersTab').hide()
+                $('#pendingOrdersTab').show();
+
+                visiblePendingOrders = $('#pendingOrderTableBody tr');
+                currentOrderPage = 1;
+                paginationTable(visiblePendingOrders);
+            })
+
+            $('#allOrdersBtn').click(() => {
+                $('#allOrdersBtn').addClass('btnActive');
+                $('#pendingTabBtn').removeClass('btnActive');
+
+                $('#pendingOrdersTab').hide();
+                $('#allOrdersTab').show();
+
+                visibleAllOrders = $('#allOrderTableBody tr');
+                currentOrderPage = 1;
+                paginationTable(visibleAllOrders);
+            })
+
+            $(document).off('click', '.shipOrderBtn').on('click', '.shipOrderBtn', function () {
+                const id = $(this).data('id');
+                $.post('/Admin/ShipOrder', { id: id }, (html) => {
+                    $('#orderContent').html(html);
+                });
+            });
+
         })
-    }
+
+        function paginationTable(tableRows) {
+            const rows = tableRows;
+            const totalRows = rows.length;
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+            if (currentOrderPage > totalPages) {
+                currentOrderPage = totalPages;
+            }
+            if (currentOrderPage < 1) {
+                currentOrderPage = 1;
+            }
+
+            const parentId = rows.parent().attr('id');
+
+            if (parentId === "allOrderTableBody") {
+                $('#pageInfoAll').text(`Page ${currentOrderPage} of ${totalPages}`);
+            } else {
+                $('#pageInfo').text(`Page ${currentOrderPage} of ${totalPages}`);
+            }
+
+            rows.hide();
+            const start = (currentOrderPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            rows.slice(start, end).show();
+
+            if (parentId === "allOrderTableBody") {
+                $('#prevPageAll').prop('disabled', currentOrderPage === 1);
+                $('#nextPageAll').prop('disabled', currentOrderPage === totalPages);
+            } else {
+                $('#prevPage').prop('disabled', currentOrderPage === 1);
+                $('#nextPage').prop('disabled', currentOrderPage === totalPages);
+            }
+            
+        }
+
+        $('#prevPage').click(() => {
+            currentOrderPage--;
+            paginationTable(visiblePendingOrders);
+        })
+
+        $('#nextPage').click(() => {
+            currentOrderPage++;
+            paginationTable(visiblePendingOrders);
+        })
+
+        $('#prevPageAll').click(() => {
+            currentOrderPage--;
+            paginationTable(visibleAllOrders);
+        })
+
+        $('#nextPageAll').click(() => {
+            currentOrderPage++;
+            paginationTable(visibleAllOrders);
+        })
+
+        $("#filterProductDropDown").on('change', function () {
+            const filterValue = $(this).val().toLowerCase();
+            $('#pendingOrderTableBody tr').each(function () {
+                const productName = $(this).find('td:eq(0)').text().toLowerCase();
+                if (filterValue === "" || filterValue === productName) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            })
+
+            visiblePendingOrders = $('#pendingOrderTableBody tr:visible');
+            currentOrderPage = 1;
+            paginationTable(visiblePendingOrders);
+        })
+
+        $("#filterStatusDropDown").on('change', function () {
+            const filterValue = $(this).val().toLowerCase();
+            $('#allOrderTableBody tr').each(function () {
+                const status = $(this).find('td:eq(4)').text().toLowerCase();
+                if (filterValue === "" || filterValue === status) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            })
+
+            visibleAllOrders = $('#allOrderTableBody tr:visible');
+            currentOrderPage = 1;
+            paginationTable(visibleAllOrders);
+        })
+
+        $("#searchTxt").on('keyup', function () {
+            const searchValue = $(this).val().toLowerCase();
+            $('#pendingOrderTableBody tr').filter(function () {
+                $(this).toggle(searchValue === "" || $(this).find('td:eq(0)').text().toLowerCase().includes(searchValue))
+            })
+
+            visiblePendingOrders = $('#pendingOrderTableBody tr:visible');
+            currentOrderPage = 1;
+            paginationTable(visiblePendingOrders);
+        })
+
+        $('#sortByName').click(() => {
+            const rows = $('#pendingOrderTableBody tr').get();
+            rows.sort((a, b) => {
+                const nameA = $(a).find('td:eq(2)').text().toLowerCase();
+                const nameB = $(b).find('td:eq(2)').text().toLowerCase();
+
+                if (nameA > nameB) {
+                    return sortAsc ? 1 : -1;
+                }
+
+                if (nameA < nameB) {
+                    return sortAsc ? -1 : 1
+                }
+
+                return 0;
+            });
+
+            $.each(rows, function (index, row) {
+                $('#pendingOrderTableBody').append(row);
+            })
+
+            visiblePendingOrders = $('#pendingOrderTableBody tr:visible');
+
+            sortAsc = !sortAsc;
+            paginationTable(visiblePendingOrders);
+        })
+    })();
+
 </script>
 

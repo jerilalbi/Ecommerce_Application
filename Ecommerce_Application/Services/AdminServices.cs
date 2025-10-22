@@ -94,14 +94,26 @@ namespace Ecommerce_Application.Services
             }
         }
 
-        public Task<bool> AddNewProduct(ProductModel product, string token)
+        public Task<bool> AddNewProduct(ProductModel product, string token, HttpPostedFileBase file)
         {
             try
             {
                 return CallAPI(async client =>
                 {
-                    var response = await client.PostAsJsonAsync("admin/addProduct", product);
-                    return response.IsSuccessStatusCode;
+                    using(var content = new MultipartFormDataContent())
+                    {
+                        var contentStream = new StreamContent(file.InputStream);
+
+                        content.Add(contentStream, "file", file.FileName);
+                        content.Add(new StringContent(product.ProductName), "ProductName");
+                        content.Add(new StringContent(product.ProductCategory), "ProductCategory");
+                        content.Add(new StringContent(Convert.ToString(product.price)), "Price");
+                        content.Add(new StringContent(Convert.ToString(product.quantity)), "Quantity");
+
+                        var response = await client.PostAsync("admin/addProduct", content);
+                        return response.IsSuccessStatusCode;
+                    }
+                        
                 }, token);
             }
             catch (Exception ex)
@@ -111,14 +123,30 @@ namespace Ecommerce_Application.Services
             }
         }
 
-        public Task<bool> UpdateProduct(ProductModel product, string token)
+        public Task<bool> UpdateProduct(ProductModel product, string token, HttpPostedFileBase file)
         {
             try
             {
                 return CallAPI(async client =>
                 {
-                    var response = await client.PutAsJsonAsync("admin/updateProduct", product);
-                    return response.IsSuccessStatusCode;
+                    using(var content = new MultipartFormDataContent())
+                    {
+                        if(file != null && file.ContentLength > 0)
+                        {
+                            var contentStream = new StreamContent(file.InputStream);
+                            content.Add(contentStream, "imgFile", file.FileName);
+                        }
+
+                        content.Add(new StringContent(Convert.ToString(product.ProductId)), "ProductId");
+                        content.Add(new StringContent(product.ProductName), "ProductName");
+                        content.Add(new StringContent(product.ProductCategory), "ProductCategory");
+                        content.Add(new StringContent(Convert.ToString(product.price)), "Price");
+                        content.Add(new StringContent(Convert.ToString(product.quantity)), "Quantity");
+                        content.Add(new StringContent(product.imgUrl), "ImgUrl");
+
+                        var response = await client.PostAsync("admin/updateProduct", content);
+                        return response.IsSuccessStatusCode;
+                    }
                 }, token);
             }
             catch (Exception ex)
@@ -128,13 +156,14 @@ namespace Ecommerce_Application.Services
             }
         }
 
-        public Task<bool> DeleteProduct(int id, string token)
+        public Task<bool> DeleteProduct(int id, string imgUrl, string token)
         {
             try
             {
                 return CallAPI(async client =>
                 {
-                    var response = await client.DeleteAsync($"admin/deleteProduct/{id}");
+                    var body = new { ProductId = id, imgUrl = imgUrl };
+                    var response = await client.PostAsJsonAsync($"admin/deleteProduct", body);
                     return response.IsSuccessStatusCode;
                 }, token);
             }

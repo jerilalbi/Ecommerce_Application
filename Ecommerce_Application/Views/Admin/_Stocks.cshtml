@@ -24,9 +24,16 @@
     </div>
 </section>
 
+<div id="loadingSpinner" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:9999;">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     $(document).ready(() => {
+
+        $('#loadingSpinner').show();
 
         $.get('/Admin/GetStocks').done((data) => {
 
@@ -36,7 +43,9 @@
                 console.log('No data found or API failed')
             }
 
-        });
+        }).always(() => {
+            $('#loadingSpinner').hide();
+        })
 
     })
 

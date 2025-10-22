@@ -1,31 +1,30 @@
 ﻿$(document).ready(() => {
 
-    $.get('/Admin/GetSales').done((data) => {
+    if (!window.dashboardSalesData) {
 
-        if (data.success) {
+        $('#loadingSpinnerSales').show();
 
-            createSalesByMonthChart(data.salesMonth)
-            createSalesByCategoryChart(data.salesCategory)
-            createTopProductsChart(data.topProduct)
-        } else {
-            console.log('No data found or API failed')
-        }
-        
-    });
+        $.get('/Admin/GetSales').done((data) => {
 
-    const chartColors = [
-        '#36A2EB',
-        '#FF6384',
-        '#FFCD56',
-        '#4BC0C0',
-        '#9966FF',
-        '#FF9F40',
-        '#A0522D',
-        '#2ECC40',
-        '#FF69B4',
-        '#6A5ACD'
-    ];
+            if (data.success) {
+                window.dashboardSalesData = data
+                createSalesByMonthChart(data.salesMonth)
+                createSalesByCategoryChart(data.salesCategory)
+                createTopProductsChart(data.topProduct)
+            } else {
+                console.log('No data found or API failed')
+            }
+        }).always(() => {
+            $('#loadingSpinnerSales').hide();
+        })
+    } else {
+        createSalesByMonthChart(window.dashboardSalesData.salesMonth)
+        createSalesByCategoryChart(window.dashboardSalesData.salesCategory)
+        createTopProductsChart(window.dashboardSalesData.topProduct)
+    }
+
     function createSalesByMonthChart(salesData) {
+
         const ctx = document.getElementById('salesByMonthChart').getContext('2d');
 
         const rawData = salesData;
@@ -78,6 +77,20 @@
     }
 
     function createSalesByCategoryChart(categoryData) {
+
+        const chartColors = [
+            '#36A2EB',
+            '#FF6384',
+            '#FFCD56',
+            '#4BC0C0',
+            '#9966FF',
+            '#FF9F40',
+            '#A0522D',
+            '#2ECC40',
+            '#FF69B4',
+            '#6A5ACD'
+        ];
+
         const ctx = document.getElementById('salesByCategoryChart').getContext('2d');
 
         const rawData = categoryData;
@@ -136,6 +149,20 @@
     }
 
     function createTopProductsChart(productData) {
+
+        const chartColors = [
+            '#36A2EB',
+            '#FF6384',
+            '#FFCD56',
+            '#4BC0C0',
+            '#9966FF',
+            '#FF9F40',
+            '#A0522D',
+            '#2ECC40',
+            '#FF69B4',
+            '#6A5ACD'
+        ];
+
         const ctx = document.getElementById('salesByChannelChart').getContext('2d');
 
         const rawData = productData;

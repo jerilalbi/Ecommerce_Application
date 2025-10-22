@@ -3,9 +3,12 @@ using Ecommerce_API.Models;
 using Microsoft.Ajax.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web;
 using System.Web.Http;
 
 namespace Ecommerce_API.Controllers
@@ -98,10 +101,31 @@ namespace Ecommerce_API.Controllers
 
         [HttpPost]
         [Route("addProduct")]
-        public IHttpActionResult AddProduct([FromBody] ProductModel productModel)
+        public IHttpActionResult AddProduct()
         {
+            var httpRequest = HttpContext.Current.Request;
+
+            ProductModel productModel = new ProductModel
+            {
+                ProductName = httpRequest.Form["ProductName"],
+                ProductCategory = httpRequest.Form["ProductCategory"],
+                price = Convert.ToInt32(httpRequest.Form["Price"]),
+                quantity = Convert.ToInt32(httpRequest.Form["Quantity"])
+            };
+
+            if (httpRequest.Files.Count == 0)
+            {
+                return BadRequest("No file uploaded");
+            }
+
+            var file = httpRequest.Files[0];
+            if(file == null || file.ContentLength == 0)
+            {
+                return BadRequest("Empty File");
+            }
+
             AdminDAL adminDAL = new AdminDAL();
-            int result = adminDAL.addProduct(productModel);
+            int result = adminDAL.addProduct(productModel,file);
 
             if (result != 0)
             {
@@ -113,10 +137,58 @@ namespace Ecommerce_API.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPost]
         [Route("updateProduct")]
-        public IHttpActionResult UpdateProduct([FromBody] ProductModel productModel)
+        public IHttpActionResult UpdateProduct()
         {
+            var httpRequest = HttpContext.Current.Request;
+
+            ProductModel productModel = new ProductModel
+            {
+                ProductId = Convert.ToInt32(httpRequest.Form["ProductId"]),
+                ProductName = httpRequest.Form["ProductName"],
+                ProductCategory = httpRequest.Form["ProductCategory"],
+                price = Convert.ToInt32(httpRequest.Form["Price"]),
+                quantity = Convert.ToInt32(httpRequest.Form["Quantity"]),
+                imgUrl = httpRequest.Form["ImgUrl"]
+            };
+
+            string imgUrl = productModel.imgUrl;
+
+            if (httpRequest.Files.Count > 0)
+            {
+                var file = httpRequest.Files["imgFile"];
+                if(file != null && file.ContentLength > 0)
+                {
+                    Trace.WriteLine("File uploaded: " + imgUrl);
+                    string uploadsFolder = HttpContext.Current.Server.MapPath("~/Uploads/ProductImages/");
+
+                    if (!imgUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string fileName = Path.GetFileName(imgUrl);
+                        string filePath = Path.Combine(uploadsFolder, fileName);
+
+                        if (File.Exists(filePath))
+                        {
+                            File.Delete(filePath);
+                        }
+                        file.SaveAs(filePath);
+
+                        imgUrl = "/Uploads/ProductImages/" + fileName;
+                    }
+                    else
+                    {
+                        string newFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                        string newFilePath = Path.Combine(uploadsFolder, newFileName);
+
+                        file.SaveAs(newFilePath);
+                        imgUrl = "/Uploads/ProductImages/" + newFileName;
+                    }
+                }
+            }
+
+            productModel.imgUrl = imgUrl;
+
             AdminDAL adminDAL = new AdminDAL();
             int result = adminDAL.updateProduct(productModel);
 
@@ -130,15 +202,26 @@ namespace Ecommerce_API.Controllers
             }
         }
 
-        [HttpDelete]
-        [Route("deleteProduct/{productId}")]
-        public IHttpActionResult DeleteProduct(int productId)
+        [HttpPost]
+        [Route("deleteProduct")]
+        public IHttpActionResult DeleteProduct([FromBody] ProductModel product)
         {
             AdminDAL adminDAL = new AdminDAL();
-            int result = adminDAL.deleteProduct(productId);
+            int result = adminDAL.deleteProduct(product);
 
             if (result != 0)
             {
+                if (product.imgUrl != null && !product.imgUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                {
+                    string uploadsFolder = HttpContext.Current.Server.MapPath("~/Uploads/ProductImages/");
+                    string fileName = Path.GetFileName(product.imgUrl);
+                    string filePath = Path.Combine(uploadsFolder, fileName);
+                    if (File.Exists(filePath))
+                    {
+                        File.Delete(filePath);
+                    }
+                }
+
                 return Ok(new { success = true, message = "Product Deleted" });
             }
             else

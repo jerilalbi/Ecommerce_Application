@@ -1,4 +1,15 @@
 ﻿@model  List<string>
+
+<style>
+    .hidden-file-input {
+        opacity: 0;
+        position: absolute;
+        z-index: -1;
+        width: 0.1px;
+        height: 0.1px;
+    }
+
+</style>
 <section style="background-color: #91C4C3; width: 100%; min-height: 100vh; padding: 15px">
     <div>
         <h3 id="secHeading">Add Product</h3>
@@ -52,15 +63,30 @@
                 </tr>
                 <tr>
                     <td>
-                        <input id="productImgField" type="text" class="form-control form-control-lg" placeholder="Product Img" style="width: 350px;" />
+                        <label id="addImgLabel" style="font-weight: 600; font-size: 20px;">Add Image:</label>
+                        <div class="d-flex gap-2 mt-2">
+                            <div>
+                                <input class="hidden-file-input" type="file" id="productImg" name="ProductImage" accept=".jpg,.jpeg,.png" />
+                                <label for="productImg" style="cursor: pointer; height: 70px; width: 70px; border-radius: 8px; background-color: #80A1BA;" class="d-flex justify-content-center align-items-center">
+                                     <i class="fa-solid fa-upload" style="color: white; font-size: 30px"></i>
+                                </label>
+                            </div>
+                            
+                            <div>
+                                <img id="imgBx" style="display: none; height: 70px; width: 70px; border-radius: 8px; object-fit: cover" src="" />
+                            </div>
+                        </div>
+                        
+                        <input id="productImgField" type="hidden" class="form-control form-control-lg" placeholder="Product Img" style="width: 350px;" />
                     </td>
                     <td class="align-middle">
-                        <h5 id="productImgError" style="display: none" class="text-danger">Enter the Img</h5>
+                        <h5 id="productImgError" style="display: none" class="text-danger">Select an Image</h5>
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="2">
+                    <td colspan="2" class="pt-3">
                         <button id="addProductBtn" type="button" class="btn btn-success">Add Product</button>
+                        <button id="clearBtn" type="button" class="btn btn-warning ms-3" style="font-weight: 500">Clear</button>
                     </td>
                 </tr>
             </table>
@@ -136,11 +162,31 @@
             autohide: true,
             delay: 5000
         });
+        const deleteModalElement = $('#deleteModal');
+        const deleteModal = new bootstrap.Modal(deleteModalElement);
 
         $('.dropdown-item').click(function (event) {
             event.preventDefault();
             const selectedText = $(this).text();
             $('#showCategory').text(selectedText);
+        })
+
+        $('#productImg').change(function () {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const imageDataUrl = e.target.result;
+                    $('#imgBx').attr('src', imageDataUrl).show();
+                };
+
+                reader.readAsDataURL(file);
+            }
+        })
+
+        $('#clearBtn').click(function () {
+            resetToAddProduct();
         })
 
         $('#addProductBtn').click(function () {
@@ -150,59 +196,74 @@
                     const productCategory = $('#showCategory').text()
                     const productPrice = $('#productPriceField').val()
                     const productStock = $('#productStockField').val()
-                    const productImg = $('#productImgField').val()
+                    const productImgFile = $('#productImg').get(0).files;
 
-                    $.post('/Admin/AddNewProduct',
-                        {
-                            ProductName: productName,
-                            ProductCategory: productCategory,
-                            price: productPrice,
-                            imgUrl: productImg,
-                            quantity: productStock
-                        },
-                        (data) => {
+                    var formData = new FormData();
+                    formData.append("file", productImgFile[0]);
+                    formData.append("ProductName", productName);
+                    formData.append("ProductCategory", productCategory);
+                    formData.append("Price", productPrice);
+                    formData.append("Quantity", productStock);
+
+                    $.ajax({
+                        url: '/Admin/AddNewProduct',
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
                             if (data.success) {
                                 showToast('Product Added', 'New Product Added', 'bg-success')
-                                $('#productForm')[0].reset();
+
+                                resetToAddProduct();
                             } else {
                                 showToast('Error', 'No Product Added', 'bg-danger')
                             }
+                        },
+                        error: function () {
+                            showToast('Error', 'Server Error', 'bg-danger')
                         }
-                    )
-                    $('#addProductBtn').text('Add Product')
-                    $('#secHeading').text('Add Product')
+                    });
                 }
             } else {
                 if (validateInputs()) {
+
                     const productId = $('#productId').val()
                     const productName = $('#productNameField').val()
                     const productCategory = $('#showCategory').text()
                     const productPrice = $('#productPriceField').val()
                     const productStock = $('#productStockField').val()
                     const productImg = $('#productImgField').val()
+                    const productImgFile = $('#productImg').get(0).files;
 
-                    console.log(productId);
+                    var formData = new FormData();
+                    formData.append("file", productImgFile[0]);
+                    formData.append("ProductId", productId);
+                    formData.append("ProductName", productName);
+                    formData.append("ProductCategory", productCategory);
+                    formData.append("Price", productPrice);
+                    formData.append("Quantity", productStock);
+                    formData.append("ImgUrl", productImg);
 
-                    $.post('/Admin/UpdateProduct',
-                        {
-                            ProductId: productId,
-                            ProductName: productName,
-                            ProductCategory: productCategory,
-                            price: productPrice,
-                            imgUrl: productImg,
-                            quantity: productStock
-                        },
-                        (data) => {
+                    $.ajax({
+                        url: '/Admin/UpdateProduct',
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
                             if (data.success) {
                                 showToast('Product Updated', 'Product Updated Successfully', 'bg-success')
-                                $('#productForm')[0].reset();
-                                $('#addProductBtn').text('Add Product')
-                                $('#secHeading').text('Add Product')
+
+                                resetToAddProduct();
                             } else {
                                 showToast('Error', 'No Product Updated', 'bg-danger')
                             }
+                        },
+                        error: function () {
+                            showToast('Error', 'Server Error', 'bg-danger')
                         }
-                    )
+                    });
                 }
             }
         })
@@ -212,6 +273,7 @@
             const category = $(this).data('category');
             const price = $(this).data('price');
             const stock = $(this).data('stock');
+            const img_path = $(this).data('img-db');
             const img = $(this).data('img');
             const id = $(this).data('pid')
 
@@ -219,36 +281,49 @@
             $('#productNameField').val(name);
             $('#productPriceField').val(price);
             $('#productStockField').val(stock);
-            $('#productImgField').val(img);
+            $('#productImgField').val(img_path);
             $('#showCategory').text(category);
 
-            $('section').animate({ scrollTop: 0 }, 'slow');
+            $('#imgBx').attr('src', img).show();
 
             $('#addProductBtn').text('Update Product')
             $('#secHeading').text('Update Product')
+            $('#addImgLabel').text('Update Image:')
         });
 
         let selectedProductId = null;
         $(document).on('click', '.delete-btn', function () {
             selectedProductId = $(this).data('product-id');
-            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            selectedImgUrl = $(this).data('img-url');
+
             deleteModal.show();
         });
 
         $('#confirmDeleteBtn').click(function () {
             $.post('/Admin/DeleteProduct',
                 {
-                    productId: selectedProductId
+                    productId: selectedProductId,
+                    imgUrl: selectedImgUrl
                 },
                 (data) => {
                     if (data.success) {
-                        showToast('Product Deleted', 'Product Deleted Successfully', 'bg-success')
+                        showToast('Product Deleted', 'Product Deleted Successfully', 'bg-success');
+                        deleteModal.hide();
                     } else {
                         showToast('Error', 'No Product Deleted', 'bg-danger')
                     }
                 }
             )
         })
+
+        function resetToAddProduct() {
+            $('#productForm')[0].reset();
+            $('#addImgLabel').text('Add Image:')
+            $('#addProductBtn').text('Add Product')
+            $('#secHeading').text('Add Product')
+            $('#addImgLabel').text('Add Image:');
+            $('#imgBx').hide();
+        }
 
         function showToast(title, message, bgClass) {
             $('#toastElement').removeClass('bg-success bg-danger bg-warning').addClass(bgClass);
@@ -284,7 +359,7 @@
                 <td>${product.ProductName}</td>
                 <td>${product.ProductCategory}</td>
                 <td>₹ ${product.price}</td>
-                <td>${product.imgUrl}</td>
+                <td> <img src="${product.ImgFullUrl}" style="height: 50px; width: 50px; object-fit: cover" /></td>
                 <td>${product.quantity}</td>
                 <td>
                     <button
@@ -295,7 +370,8 @@
                     data-category="${product.ProductCategory}"
                     data-price="${product.price}"
                     data-stock="${product.quantity}"
-                    data-img="${product.imgUrl}">
+                    data-img-db="${product.imgUrl}"
+                    data-img="${product.ImgFullUrl}">
                     Update
                 </button>
                 </td>
@@ -303,7 +379,8 @@
                 <button id="searchProductBtn"
                 type="button"
                 class="ms-2 btn btn-danger delete-btn"
-                data-product-id="${product.ProductId}">
+                data-product-id="${product.ProductId}"
+                data-img-url="${product.imgUrl}">
                 Delete</button></td>
             </tr>
                 `;
@@ -321,7 +398,7 @@
         const productCategory = $('#showCategory').text()
         const productPrice = $('#productPriceField').val()
         const productStock = $('#productStockField').val()
-        const productImg = $('#productImgField').val()
+        const productImg = $('#imgBx').attr('src');
 
         if (productName.trim() === "") {
             $("#productNameError").show()
@@ -351,15 +428,10 @@
             $("#productStockError").hide()
         }
 
-        if (productImg.trim() === "") {
+        if (productImg.length === 0) {
             $("#productImgError").show()
             return false;
-        } else if (isFinite(productImg)) {
-            $("#productImgError").show()
-            $("#productImgError").text("Enter a valid Link")
-            return false;
-        }
-        else {
+        } else {
             $("#productImgError").hide()
         }
 

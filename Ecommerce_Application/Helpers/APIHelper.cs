@@ -11,6 +11,9 @@ namespace Ecommerce_Application.Helpers
     public abstract class APIHelper
     {
         protected delegate Task<T> ExecuteDelegate<T>(HttpClient client);
+
+        protected const string ApiImgBaseUrl = "http://localhost:60";
+
         protected static readonly HttpClient client = new HttpClient
         {
             //BaseAddress = new Uri("https://localhost:44301/api/")
