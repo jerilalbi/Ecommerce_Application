@@ -100,8 +100,9 @@ namespace Ecommerce_Application.Controllers
                 List<StocksModel> stocksDataRaw = JsonConvert.DeserializeObject<List<StocksModel>>(Convert.ToString(data.stockData));
 
                 var stocksData = stocksDataRaw.OrderBy(val => val.Quantity).ToList();
+                var stocksDataGraph = stocksDataRaw.Where(val => val.Quantity < 10).OrderBy(val => val.Quantity).ToList();
 
-                return Json(new { success = true, stockData = stocksData}, JsonRequestBehavior.AllowGet);
+                return Json(new { success = true, stockData = stocksData, stockDataGraph = stocksDataGraph}, JsonRequestBehavior.AllowGet);
             }
             else
             {
@@ -112,9 +113,12 @@ namespace Ecommerce_Application.Controllers
         public async Task<ActionResult> ShipOrder(int id)
         {
             bool isresult =await adminServices.ShipOrder(Request.Cookies["Token"].Value, id);
-            dynamic data = await adminServices.GetDeliveryOrders(Request.Cookies["Token"].Value);
-            List<DeliveryModel> orderData = JsonConvert.DeserializeObject<List<DeliveryModel>>(Convert.ToString(data));
-            return PartialView("_Orders", orderData);
+            if(!isresult)
+            {
+                return Json(new { success = isresult, });
+            }
+
+            return await Orders();
         }
 
         public async Task<JsonResult> AddNewProduct()
@@ -181,6 +185,16 @@ namespace Ecommerce_Application.Controllers
         {
             bool isUserDemoted = await adminServices.DemoteAdmin(email, Request.Cookies["Token"].Value);
             if (isUserDemoted) {
+                return await Users();
+            }
+            return Json(new { success = isUserDemoted, });
+        }
+
+        public async Task<ActionResult> ActivateUser(int userId)
+        {
+            bool isUserDemoted = await adminServices.ActivateUser(userId, Request.Cookies["Token"].Value);
+            if (isUserDemoted)
+            {
                 return await Users();
             }
             return Json(new { success = isUserDemoted, });

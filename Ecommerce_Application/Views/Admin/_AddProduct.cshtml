@@ -47,6 +47,7 @@
                 </tr>
                 <tr>
                     <td>
+                        <label id="addImgLabel" style="font-weight: 700; font-size: 18px;">Product Price:</label>
                         <input id="productPriceField" type="number" class="form-control form-control-lg" min="1" placeholder="Product Price" onkeypress="return event.charCode >= 48" style="width: 350px;" />
                     </td>
                     <td class="align-middle">
@@ -55,6 +56,7 @@
                 </tr>
                 <tr>
                     <td>
+                        <label id="addImgLabel" style="font-weight: 700; font-size: 18px;">Product Stock:</label>
                         <input id="productStockField" type="number" class="form-control form-control-lg" min="1" placeholder="Product Stock" onkeypress="return event.charCode >= 48" style="width: 350px;" />
                     </td>
                     <td class="align-middle">
@@ -163,7 +165,7 @@
             delay: 5000
         });
         const deleteModalElement = $('#deleteModal');
-        const deleteModal = new bootstrap.Modal(deleteModalElement);
+        const deleteModal = new bootstrap.Modal(deleteModalElement[0]);
 
         $('.dropdown-item').click(function (event) {
             event.preventDefault();
@@ -215,6 +217,9 @@
                             if (data.success) {
                                 showToast('Product Added', 'New Product Added', 'bg-success')
 
+                                if ($('#productQuery').val().trim() != "") {
+                                    searchProduct();
+                                }
                                 resetToAddProduct();
                             } else {
                                 showToast('Error', 'No Product Added', 'bg-danger')
@@ -255,6 +260,7 @@
                             if (data.success) {
                                 showToast('Product Updated', 'Product Updated Successfully', 'bg-success')
 
+                                searchProduct();
                                 resetToAddProduct();
                             } else {
                                 showToast('Error', 'No Product Updated', 'bg-danger')
@@ -291,6 +297,8 @@
             $('#addImgLabel').text('Update Image:')
         });
 
+        $(document).off('click', '.delete-btn');
+
         let selectedProductId = null;
         $(document).on('click', '.delete-btn', function () {
             selectedProductId = $(this).data('product-id');
@@ -308,6 +316,8 @@
                 (data) => {
                     if (data.success) {
                         showToast('Product Deleted', 'Product Deleted Successfully', 'bg-success');
+
+                        searchProduct();
                         deleteModal.hide();
                     } else {
                         showToast('Error', 'No Product Deleted', 'bg-danger')
@@ -376,7 +386,7 @@
                 </button>
                 </td>
                 <td>
-                <button id="searchProductBtn"
+                <button
                 type="button"
                 class="ms-2 btn btn-danger delete-btn"
                 data-product-id="${product.ProductId}"

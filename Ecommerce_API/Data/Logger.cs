@@ -12,6 +12,7 @@ namespace Ecommerce_API.Data
         {
             ErrorDAL error = new ErrorDAL();
             error.LogToDB(ex);
+            error.LogToEventLog(ex);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Ecommerce_API.Data.Concrete;
+﻿using Ecommerce_API.Data;
+using Ecommerce_API.Data.Concrete;
 using Ecommerce_API.Models;
 using System;
 using System.Collections.Generic;
@@ -18,10 +19,10 @@ namespace Ecommerce_API.Controllers
         [AllowAnonymous]
         [HttpPost]
         [Route("register")]
-        public IHttpActionResult Register([FromBody]RegisterModel register)
+        public IHttpActionResult Register([FromBody] RegisterModel register)
         {
             int rows = userDAL.RegisterUser(register);
-            if(rows == -1)
+            if (rows == -1)
             {
                 return Ok(new { success = true, message = "User Registred" });
             }
@@ -34,10 +35,10 @@ namespace Ecommerce_API.Controllers
         [AllowAnonymous]
         [HttpPost]
         [Route("login")]
-        public IHttpActionResult Login([FromBody]LoginModel login)
+        public IHttpActionResult Login([FromBody] LoginModel login)
         {
             UserModel user = userDAL.LoginUser(login);
-            if(user != null)
+            if (user != null)
             {
                 return Ok(new { success = true, user });
             }
@@ -53,7 +54,8 @@ namespace Ecommerce_API.Controllers
         {
             UserModel user = userDAL.getUserDetails(userModel);
 
-            if (user != null) { 
+            if (user != null)
+            {
                 return Ok(new { success = true, user });
             }
             else
@@ -75,10 +77,12 @@ namespace Ecommerce_API.Controllers
 
         [HttpPost]
         [Route("updateImg")]
-        public IHttpActionResult UpdateUserImg(int userId){
+        public IHttpActionResult UpdateUserImg(int userId)
+        {
             var httpRequest = HttpContext.Current.Request;
 
-            if (httpRequest.Files.Count == 0) {
+            if (httpRequest.Files.Count == 0)
+            {
                 return BadRequest("No file Uploaded");
             }
 
@@ -92,7 +96,7 @@ namespace Ecommerce_API.Controllers
 
             string imgPath = userDAL.UpdateUserProfileImg(userId, file);
 
-            return Ok(new { success = true, imgPath = imgPath, Message = "Image Updated"});
+            return Ok(new { success = true, imgPath = imgPath, Message = "Image Updated" });
         }
 
         [HttpPut]
@@ -101,9 +105,9 @@ namespace Ecommerce_API.Controllers
         {
             int result = userDAL.updateUserAddress(userModel);
 
-            if(result != 0)
+            if (result != 0)
             {
-                return Ok(new {success = true, message = "User Address Updated"});
+                return Ok(new { success = true, message = "User Address Updated" });
             }
             else
             {
@@ -119,7 +123,7 @@ namespace Ecommerce_API.Controllers
             string oldPassword = Convert.ToString(body.OldPassword);
             string newPassword = Convert.ToString(body.NewPassword);
 
-            int result = userDAL.ChangePassword(oldPassword,newPassword,userId);
+            int result = userDAL.ChangePassword(oldPassword, newPassword, userId);
 
             if (result != 0)
             {
@@ -133,15 +137,33 @@ namespace Ecommerce_API.Controllers
 
         [HttpDelete]
         [Route("deleteAccount")]
-        public IHttpActionResult DeleteAccount([FromBody] UserModel userModel) {
+        public IHttpActionResult DeleteAccount([FromBody] UserModel userModel)
+        {
             int result = userDAL.deleteAccount(userModel);
 
-            if (result != 0) {
+            if (result != 0)
+            {
                 return Ok(new { success = true, message = "Account Deleted" });
             }
             else
             {
                 return BadRequest("Account not deleted");
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("errorTest")]
+        public IHttpActionResult ErrorTest()
+        {
+            try
+            {
+                throw new Exception("This is a test exception for error handling.");
+            }
+            catch(Exception ex)
+            {
+                Logger.log(ex);
+                return InternalServerError(ex);
             }
         }
     }

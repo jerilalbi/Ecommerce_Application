@@ -11,15 +11,39 @@
         box-sizing: border-box;
         background-color: #80A1BA;
         border-radius: 10px;
-        height: 90vh;
+        height: 50vh;
         width: 100%;
     }
 </style>
 
-<section style="background-color: #91C4C3; width: 100%; min-height: 100vh; display: flex; align-items: center">
+<section style="background-color: #91C4C3; width: 100%; min-height: 100vh;">
     <div id="dashboardWrapper">
         <div id="salesByMonth">
             <canvas id="stockDataChart"></canvas>
+        </div>
+        <div class="mt-4">
+            <div id="stockTableSec">
+                <div style="box-shadow: 5px 5px 7px white; border-radius: 10px">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col" id="sortByStock" style="cursor: pointer">Stock <i class="fa-solid fa-sort"></i> </th>
+                            </tr>
+                        </thead>
+                        <tbody id="stocksTableBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-end mt-3">
+                    <div>
+                        <button id="prevPage" class="btn me-2 text-white" style="background-color: #80A1BA"><i class="fa-solid fa-left-long"></i></button>
+                        <span id="pageInfo"></span>
+                        <button id="nextPage" class="btn ms-2 text-white" style="background-color: #80A1BA"><i class="fa-solid fa-right-long"></i></button>
+                    </div>
+                </div>
+            </div>
+            <h5 id="noProductsLabel" style="display: none">No Products</h5>
         </div>
     </div>
 </section>
@@ -31,93 +55,194 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    $(document).ready(() => {
+    (function () {
 
-        $('#loadingSpinner').show();
+        let currentOrderPage = 1;
+        const rowsPerPage = 10;
+        let isStockAsc = false;
 
-        $.get('/Admin/GetStocks').done((data) => {
+        $(document).ready(() => {
 
-            if (data.success) {
-                createStockDataChart(data.stockData)
-            } else {
-                console.log('No data found or API failed')
-            }
+            $('#loadingSpinner').show();
 
-        }).always(() => {
-            $('#loadingSpinner').hide();
+            $.get('/Admin/GetStocks').done((data) => {
+
+                if (data.success) {
+                    createStockDataChart(data.stockDataGraph);
+                    showTable(data.stockData);
+                } else {
+                    console.log('No data found or API failed')
+                }
+
+            }).always(() => {
+                $('#loadingSpinner').hide();
+            })
+
         })
 
-    })
+        function showTable(data) {
+            if (data.length > 0) {
 
-    function createStockDataChart(stockData) {
-        const ctx = document.getElementById('stockDataChart').getContext('2d');
+                $('#noProductsLabel').hide();
 
-        const rawData = stockData;
-        const labels = rawData.map(x => x.ProductName);
-        const data = rawData.map(x => x.Quantity);
+                const $tableBody = $('#stocksTableBody');
+                $tableBody.empty();
+
+                data.forEach((product) => {
+                    const newRow =
+                        `
+                            <tr>
+                                <td>${product.ProductName}</td>
+                                <td>${product.Quantity}</td>
+                            </tr>
+                        `;
+                    $tableBody.append(newRow);
+                })
+
+                paginationTable()
+
+            } else {
+                $('#stockTableSec').hide();
+                $('#noProductsLabel').show();
+            }
+        }
+
+        function paginationTable() {
+            const rows = $('#stocksTableBody tr');;
+            const totalRows = rows.length;
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+            if (currentOrderPage > totalPages) {
+                currentOrderPage = totalPages;
+            }
+            if (currentOrderPage < 1) {
+                currentOrderPage = 1;
+            }
+
+            const parentId = rows.parent().attr('id');
+
+            if (parentId === "allOrderTableBody") {
+                $('#pageInfoAll').text(`Page ${currentOrderPage} of ${totalPages}`);
+            } else {
+                $('#pageInfo').text(`Page ${currentOrderPage} of ${totalPages}`);
+            }
+
+            rows.hide();
+            const start = (currentOrderPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            rows.slice(start, end).show();
+
+            if (parentId === "allOrderTableBody") {
+                $('#prevPageAll').prop('disabled', currentOrderPage === 1);
+                $('#nextPageAll').prop('disabled', currentOrderPage === totalPages);
+            } else {
+                $('#prevPage').prop('disabled', currentOrderPage === 1);
+                $('#nextPage').prop('disabled', currentOrderPage === totalPages);
+            }
+
+        }
+
+        $('#prevPage').click(() => {
+            currentOrderPage--;
+            paginationTable();
+        })
+
+        $('#nextPage').click(() => {
+            currentOrderPage++;
+            paginationTable();
+        })
+
+        $('#sortByStock').click(() => {
+            const rows = $('#stocksTableBody tr').get();
+            rows.sort((a, b) => {
+                const stockA = parseInt($(a).children('td').eq(1).text());
+                const stockB = parseInt($(b).children('td').eq(1).text());
+                if (!isStockAsc) {
+                    return stockB - stockA;
+                }
+                return stockA - stockB;
+            });
+
+            $.each(rows, (index, row) => {
+                $('#stocksTableBody').append(row);
+            });
+
+            isStockAsc = !isStockAsc;
+            currentOrderPage = 1;
+            paginationTable();
+        })
+
+        function createStockDataChart(stockData) {
+            const ctx = document.getElementById('stockDataChart').getContext('2d');
+
+            const rawData = stockData;
+            const labels = rawData.map(x => x.ProductName);
+            const data = rawData.map(x => x.Quantity);
 
 
-        const myChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data.map(value => {
-                        if (value === 0) {
-                            return 0.1;
-                        }
-                        return value;
-                    }),
-                    borderWidth: 1,
-                    backgroundColor: function (context) {
-                        const value = context.dataset.data[context.dataIndex];
-                        if (value < 5) {
-                            return '#ff3300'; 
-                        } else {
-                            return '#5cd65c';
-                        }
-                    },
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Low Stock Products',
-                        align: 'start',
-                        color: '#000',
-                        font: {
-                            size: 18,
-                            weight: 'bold'
-                        }
-                    },
-                    legend: {
-                        display: false,
-                    },
-                    datalabels: {
-                        color: '#000',
-                        font: { weight: 'bold', size: 14 },
-                        formatter: (value, ctx) => {
-                            let label = ctx.chart.data.labels[ctx.dataIndex];
-                            return label + '\n' + value;
-                        }
-                    },
+            const myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data.map(value => {
+                            if (value === 0) {
+                                return 0.1;
+                            }
+                            return value;
+                        }),
+                        borderWidth: 1,
+                        backgroundColor: function (context) {
+                            const value = context.dataset.data[context.dataIndex];
+                            if (value < 5) {
+                                return '#ff3300';
+                            } else {
+                                return '#5cd65c';
+                            }
+                        },
+                    }]
                 },
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#000', font: { weight: 'bold' } },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Low Stock Products',
+                            align: 'start',
+                            color: '#000',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            }
+                        },
+                        legend: {
+                            display: false,
+                        },
+                        datalabels: {
+                            color: '#000',
+                            font: { weight: 'bold', size: 14 },
+                            formatter: (value, ctx) => {
+                                let label = ctx.chart.data.labels[ctx.dataIndex];
+                                return label + '\n' + value;
+                            }
+                        },
                     },
-                    y: {
-                        grid: { display: false },
-                        ticks: { color: '#000', font: { weight: 'bold' } },
-                        beginAtZero: true
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#000', font: { weight: 'bold' } },
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#000', font: { weight: 'bold' } },
+                            beginAtZero: true
+                        }
                     }
                 }
-            }
-        });
-    }
+            });
+        }
+    })()
 </script>
 

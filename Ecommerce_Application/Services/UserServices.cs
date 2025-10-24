@@ -34,13 +34,18 @@ namespace Ecommerce_Application.Services
 
                     if(user != null)
                     {
-                        context.Session["Token"] = user["Token"];
+                        UserModel userModel = user.ToObject<UserModel>();
 
-                        HttpCookie tokenCookie = new HttpCookie("Token", user["Token"].ToString());
-                        tokenCookie.Expires = DateTime.Now.AddDays(7);
-                        HttpContext.Current.Response.Cookies.Add(tokenCookie);
+                        if(string.Equals(userModel.Status, "active", StringComparison.OrdinalIgnoreCase))
+                        {
+                            context.Session["Token"] = user["Token"];
 
-                        return user.ToObject<UserModel>();
+                            HttpCookie tokenCookie = new HttpCookie("Token", user["Token"].ToString());
+                            tokenCookie.Expires = DateTime.Now.AddDays(3);
+                            HttpContext.Current.Response.Cookies.Add(tokenCookie);
+                        }
+
+                        return userModel;
                     }
                 }
                 return null;

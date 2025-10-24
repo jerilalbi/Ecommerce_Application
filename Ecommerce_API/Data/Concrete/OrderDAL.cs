@@ -50,6 +50,7 @@ namespace Ecommerce_API.Data.Concrete
                                 ProductName = Convert.ToString(reader["product_name"]),
                                 ProductImg = Convert.ToString(reader["img"]),
                                 Quantity = Convert.ToInt32(reader["Quantity_Sold"]),
+                                Address = Convert.ToString(reader["address"]),
                                 Price = Convert.ToInt32(reader["price"]),
                                 Status = Convert.ToString(reader["status"]),
                             });

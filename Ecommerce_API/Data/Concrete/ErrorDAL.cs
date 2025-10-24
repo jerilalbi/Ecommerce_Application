@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
+using System.Linq;
+using System.Web;
 
 namespace Ecommerce_API.Data.Concrete
 {
@@ -27,6 +28,19 @@ namespace Ecommerce_API.Data.Concrete
             {
                 throw ex2;
             }
+        }
+
+        public void LogToEventLog(Exception ex)
+        {
+            string source = "EcommerceApp";
+            string logName = "Application";
+
+            if (!EventLog.SourceExists(source))
+            {
+                EventLog.CreateEventSource(source, logName);
+            }
+
+            EventLog.WriteEntry(source, ex.ToString(), EventLogEntryType.Error);
         }
     }
 }

@@ -79,36 +79,37 @@
     </div>
     <div class="p-4">
         <h3>Change Password:</h3>
-
-        <table>
-            <tr>
-                <td>
-                    <label>Old Password:</label>
-                    <input type="password" id="oldPasswordTxt" class="form-control form-control-lg" />
-                </td>
-                <td>
-                    <h6 id="oldPasswordError" style="color: red; display: none">Enter Old Password</h6>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label>New Password:</label>
-                    <input type="password" id="newPasswordTxt" class="form-control form-control-lg" />
-                </td>
-                <td>
-                    <h6 id="newPasswordError" style="color: red; display: none">Enter New Password</h6>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label>Confirm Password:</label>
-                    <input type="password" id="confirmNewPasswordTxt" class="form-control form-control-lg" />
-                </td>
-                <td>
-                    <h6 id="confirmPasswordError" style="color: red; display: none">Password Must be Same</h6>
-                </td>
-            </tr>
-        </table>
+        <form id="changePasswordForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>Old Password:</label>
+                        <input type="password" id="oldPasswordTxt" class="form-control form-control-lg" />
+                    </td>
+                    <td>
+                        <h6 id="oldPasswordError" style="color: red; display: none">Enter Old Password</h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>New Password:</label>
+                        <input type="password" id="newPasswordTxt" class="form-control form-control-lg" />
+                    </td>
+                    <td>
+                        <h6 id="newPasswordError" style="color: red; display: none">Enter New Password</h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Confirm Password:</label>
+                        <input type="password" id="confirmNewPasswordTxt" class="form-control form-control-lg" />
+                    </td>
+                    <td>
+                        <h6 id="confirmPasswordError" style="color: red; display: none">Password Must be Same</h6>
+                    </td>
+                </tr>
+            </table>
+        </form>
 
 
         <button id="changePasswordBtn" class="btn mt-3" type="button" style="background-color: #91C4C3 ">Change Password</button>
@@ -234,13 +235,14 @@
                     },
                     success: (response) => {
                         if (response.success === true) {
-                            showToast("Updated","Password Updated","bg-success")
+                            showToast("Updated", "Password Updated", "bg-success")
+                            $('#changePasswordForm')[0].reset();
                         } else {
-                            showToast("Not Updated", `Password Not Updated`, "bg-danger")
+                            showToast("Not Updated", `Old Password is Incorrect`, "bg-danger")
                         }
                     },
                     error: (xhr, status, error) => {
-                        showToast("Not Updated", `Error`, "bg-danger")
+                        showToast("Not Updated", `Server Error`, "bg-danger")
                     },
                     complete: () => {
                         btn.prop('disabled', false).text('Change Password');
@@ -250,7 +252,7 @@
 
 
             $.get('@Url.Action("LoadHeader", "Home")', { isCart: false}, function (data) {
-            $('#dynamicHeaderContent').html(data);
+                $('#dynamicHeaderContent').html(data);
             });
 
             function validateForms() {

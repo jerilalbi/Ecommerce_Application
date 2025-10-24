@@ -3,6 +3,7 @@
 @{
     ViewBag.Title = "Login";
     Layout = null;
+    string result = ViewBag.result ?? "";
 }
 
 <!DOCTYPE html>
@@ -61,21 +62,73 @@
             </div>
         </div>
     </section>
-    @if (ViewBag.result != null)
-    {
-        <div class="toast-container position-fixed bottom-0 end-0 p-3">
-            <div class="toast show bg-danger text-white">
-                <div class="toast-header">
-                    <strong class="me-auto">Login Failed</strong>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+
+    <div id="toastMsg" class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toastElement" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong id="toastHead" class="me-auto">Login Failed</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div id="toastBody" class="toast-body">
+                Invalid User Credentials
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="inActiveUserModel" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">User Is In-Active</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="toast-body">
-                    Invalid User Credentials
+                <div class="modal-body">
+                    You are logged out for a couple of days, so your account is marked as inactive. Please contact admin to reactivate your account.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="contactBtn" class="btn btn-secondary" data-bs-dismiss="modal">Contact</button>
                 </div>
             </div>
         </div>
-    }
+    </div>
+
+    <script src="~/Scripts/jquery-3.7.0.min.js"></script>
     <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(function () {
+
+            const toastElement = $('#toastElement');
+            const toast = new bootstrap.Toast(toastElement, {
+                autohide: true,
+                delay: 5000
+            });
+
+            const modalElement = $('#inActiveUserModel')[0];
+            const myModal = new bootstrap.Modal(modalElement);
+            const viewBagResult = '@Html.Raw(result)'
+
+            console.log(`view bag = ${viewBagResult}`)
+
+            if (viewBagResult === "Failed") {
+                showToast("Login Failed", "Invalid User Credentials", "bg-danger")
+            } else if (viewBagResult === "Inactive") {
+                myModal.show();
+            }
+
+            $('#contactBtn').click(() => {
+                showToast("Request Send", "Activation Request Send to Admin", "bg-success")
+            })
+
+            function showToast(title, message, bgClass) {
+                $('#toastElement').removeClass('bg-success bg-danger bg-warning').addClass(bgClass);
+                $('#toastHead').text(title);
+                $('#toastBody').text(message);
+
+                toast.show();
+            }
+        });
+    </script>
 </body>
 </html>
 

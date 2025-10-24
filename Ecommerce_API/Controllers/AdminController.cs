@@ -278,6 +278,20 @@ namespace Ecommerce_API.Controllers
             }
         }
 
-
+        [HttpGet]
+        [Route("activateUser/{id}")]
+        public IHttpActionResult ActivateUser(int id)
+        {
+            AdminDAL adminDAL = new AdminDAL();
+            int result = adminDAL.ActivateUser(id);
+            if (result != 0)
+            {
+                return Ok(new { message = "User Activated" });
+            }
+            else
+            {
+                return BadRequest("Error");
+            }
+        }
     }
 }

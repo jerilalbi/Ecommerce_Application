@@ -50,6 +50,7 @@
                                             <th scope="col">Name</th>
                                             <th scope="col">Email</th>
                                             <th scope="col">Role</th>
+                                            <th scope="col">Status</th>
                                             <th scope="col">Action</th>
                                         </tr>
                                     </thead>
@@ -60,7 +61,14 @@
                                                 <td>@user.Name</td>
                                                 <td>@user.Email</td>
                                                 <td>@user.Role</td>
-                                                <td><button type="button" id="makeAdminBtn" onclick="window.openMakeAdminModel('@user.Email','@user.Name')" class="btn btn-danger">Make Admin</button></td>
+                                                <td>@user.Status</td>
+                                                <td>
+                                                    @if (user.Status.Equals("inactive", StringComparison.OrdinalIgnoreCase))
+                                                    {
+                                                        <button type="button" id="activateUserBtn" onclick="window.activateUser('@user.UserId')" class="btn btn-success">Activate</button>
+                                                    }
+                                                    <button type="button" id="makeAdminBtn" onclick="window.openMakeAdminModel('@user.Email','@user.Name')" class="btn btn-danger">Make Admin</button>
+                                                </td>
                                             </tr>
                                         }
 
@@ -86,6 +94,7 @@
                                             <th scope="col">Name</th>
                                             <th scope="col">Email</th>
                                             <th scope="col">Role</th>
+                                            <th scope="col">Status</th>
                                             <th scope="col">Action</th>
                                         </tr>
                                     </thead>
@@ -96,7 +105,14 @@
                                                 <td>@user.Name</td>
                                                 <td>@user.Email</td>
                                                 <td>@user.Role</td>
-                                                <td><button type="button" id="demoteAdminBtn" onclick="window.openMakeAdminModel('@user.Email','@user.Name')" class="btn btn-danger">Demote Admin</button></td>
+                                                <td>@user.Status</td>
+                                                <td>
+                                                    @if (user.Status.Equals("inactive", StringComparison.OrdinalIgnoreCase))
+                                                    {
+                                                        <button type="button" id="activateUserBtn" onclick="window.activateUser('@user.UserId')" class="btn btn-success">Activate</button>
+                                                    }
+                                                    <button type="button" id="demoteAdminBtn" onclick="window.openMakeAdminModel('@user.Email','@user.Name')" class="btn btn-danger">Demote Admin</button>
+                                                </td>
                                             </tr>
                                         }
 
@@ -170,6 +186,13 @@
             adminModal.show();
         }
 
+        window.activateUser = function (userId) {
+            $.post('/Admin/ActivateUser', { userId: userId }, (html) => {
+                adminModal.hide();
+                $("#userContent").html(html)
+            })
+        }
+
         $('#confirmBtn').click(function () {
             if (operation == "user") {
                 makeAdmin();
@@ -180,15 +203,15 @@
 
         function makeAdmin() {
             $.post('/Admin/MakeAdmin', { email: userEmail }, (html) => {
-                    adminModal.hide();
-                    $("#userContent").html(html)
+                adminModal.hide();
+                $("#userContent").html(html)
             })
         }
 
         function demoteAdmin() {
             $.post('/Admin/DemoteAdmin', { email: userEmail }, (html) => {
-                    adminModal.hide();
-                    $("#userContent").html(html)
+                adminModal.hide();
+                $("#userContent").html(html)
             })
         }
     })();

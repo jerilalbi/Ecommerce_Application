@@ -155,9 +155,11 @@ namespace Ecommerce_API.Data.Concrete
                         {
                             allUsers.Add(new AllUserModel
                             {
+                                UserId = Convert.ToInt32(reader["user_id"]),
                                 Name = Convert.ToString(reader["name"]),
                                 Email = Convert.ToString(reader["email"]),
                                 Role = Convert.ToString(reader["role"]),
+                                Status = Convert.ToString(reader["status"]),
                             });
                         }
                     }
@@ -366,6 +368,26 @@ namespace Ecommerce_API.Data.Concrete
             {
                 Logger.log(ex);
                 throw;
+            }
+        }
+
+        public int ActivateUser(int userId)
+        {
+            try
+            {
+                string storedProcedure = "ActivateUser";
+                return ExecuteSQL(storedProcedure, cmd =>
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    return cmd.ExecuteNonQuery();
+                },
+                new SqlParameter("@UserId", userId)
+                );
+            }
+            catch (Exception ex)
+            {
+                Logger.log(ex);
+                throw ex;
             }
         }
     }

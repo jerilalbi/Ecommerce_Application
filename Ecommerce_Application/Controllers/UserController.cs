@@ -26,10 +26,15 @@ namespace Ecommerce_Application.Controllers
             }
 
             UserModel user = await userServices.loginUser(login, this.HttpContext);
-            Debug.WriteLine($"user = {user.Role}");
 
             if (user != null)
             {
+                if(string.Equals(user.Status, "inactive", StringComparison.OrdinalIgnoreCase))
+                {
+                    ViewBag.result = "Inactive";
+                    return View(login);
+                }
+
                 Session["UserId"] = user.UserId;
                 Session["Role"] = user.Role;
 

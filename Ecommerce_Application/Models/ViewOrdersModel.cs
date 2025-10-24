@@ -10,6 +10,7 @@ namespace Ecommerce_Application.Models
         public int DeliveryId { get; set; }
         public string ProductName { get; set; }
         public string ProductImg { get; set; }
+        public string Address { get; set; }
         public int Quantity { get; set; }
         public int Price { get; set; }
         public string Status { get; set; }

@@ -233,5 +233,22 @@ namespace Ecommerce_Application.Services
                 throw;
             }
         }
+
+        public Task<bool> ActivateUser(int userId, string token)
+        {
+            try
+            {
+                return CallAPI(async client =>
+                {
+                    var response = await client.GetAsync($"admin/activateUser/{userId}");
+                    return response.IsSuccessStatusCode;
+                }, token);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                throw;
+            }
+        }
     }
 }

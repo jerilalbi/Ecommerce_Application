@@ -15,6 +15,14 @@
         border: 2px solid black;
     }
 
+    .status-shipped {
+        color: #00b300 !important;
+    }
+
+    .status-cancelled {
+        color: #dc3545 !important;
+    }
+
 </style>
 
 <div id="orderContent">
@@ -76,7 +84,7 @@
                                     </table>
                                 </div>
                                 <div class="d-flex justify-content-end mt-3">
-                                    <div>
+                                    <div class="pagination-bottom-sec">
                                         <button id="prevPage" class="btn me-2 text-white" style="background-color: #80A1BA"><i class="fa-solid fa-left-long"></i></button>
                                         <span id="pageInfo"></span>
                                         <button id="nextPage" class="btn ms-2 text-white" style="background-color: #80A1BA"><i class="fa-solid fa-right-long"></i></button>
@@ -124,14 +132,14 @@
                                                     <td>@orders.Quantity</td>
                                                     <td>@orders.Name</td>
                                                     <td>@orders.Address</td>
-                                                    <td>@orders.Status</td>
+                                                    <td class="@("status-"+orders.Status.ToLower())" style="font-weight: 500; font-size: 16px">@orders.Status</td>
                                                 </tr>
                                             }
                                         </tbody>
                                     </table>
                                 </div>
                                 <div class="d-flex justify-content-end mt-3">
-                                    <div>
+                                    <div class="pagination-bottom-sec">
                                         <button id="prevPageAll" class="btn me-2 text-white" style="background-color: #80A1BA"><i class="fa-solid fa-left-long"></i></button>
                                         <span id="pageInfoAll"></span>
                                         <button id="nextPageAll" class="btn ms-2 text-white" style="background-color: #80A1BA"><i class="fa-solid fa-right-long"></i></button>
@@ -149,6 +157,18 @@
             </div>
         </div>
 
+        <div id="toastMsg" class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div id="toastElement" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong id="toastHead" class="me-auto">Product Added</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div id="toastBody" class="toast-body">
+                    New Product Added.
+                </div>
+            </div>
+        </div>
+
     </section>
 </div>
 
@@ -162,7 +182,14 @@
         let visiblePendingOrders;
         let visibleAllOrders;
 
+        const toastElement = $('#toastElement');
+        const toast = new bootstrap.Toast(toastElement, {
+            autohide: true,
+            delay: 5000
+        });
+
         $(document).ready(function () {
+
             visiblePendingOrders = $('#pendingOrderTableBody tr');
             paginationTable(visiblePendingOrders);
 
@@ -192,9 +219,16 @@
 
             $(document).off('click', '.shipOrderBtn').on('click', '.shipOrderBtn', function () {
                 const id = $(this).data('id');
-                $.post('/Admin/ShipOrder', { id: id }, (html) => {
-                    $('#orderContent').html(html);
-                });
+
+                $.post('/Admin/ShipOrder', { id: id }).done((res) => {
+                    if (res.success === true) {
+                        showToast('Error', "Product Not Shipped", 'bg-danger');
+                    } else {
+                        $('#orderContent').html(res);
+                    }
+                }).fail(() => {
+                    showToast('Error', "Server Error", 'bg-danger');
+                })
             });
 
         })
@@ -225,6 +259,12 @@
 
             rows.slice(start, end).show();
 
+            if (totalRows <= 10) {
+                $(".pagination-bottom-sec").hide();
+            } else {
+                $(".pagination-bottom-sec").show();
+            }
+
             if (parentId === "allOrderTableBody") {
                 $('#prevPageAll').prop('disabled', currentOrderPage === 1);
                 $('#nextPageAll').prop('disabled', currentOrderPage === totalPages);
@@ -232,7 +272,7 @@
                 $('#prevPage').prop('disabled', currentOrderPage === 1);
                 $('#nextPage').prop('disabled', currentOrderPage === totalPages);
             }
-            
+
         }
 
         $('#prevPage').click(() => {
@@ -324,6 +364,26 @@
             sortAsc = !sortAsc;
             paginationTable(visiblePendingOrders);
         })
+
+        function showToast(title, message, bgClass) {
+            $('#toastElement').removeClass('bg-success bg-danger bg-warning').addClass(bgClass);
+            $('#toastHead').text(title);
+            $('#toastBody').text(message);
+
+            toast.show();
+        }
+
+        function getStatusColor(status) {
+            switch (status.toLowerCase()) {
+                case "shipped":
+                    return "text-bg-success";
+                case "cancelled":
+                    return "text-bg-danger";
+                default:
+                    return "";
+            }
+        }
+
     })();
 
 </script>

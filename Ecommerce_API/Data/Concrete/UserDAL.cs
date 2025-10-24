@@ -65,11 +65,10 @@ namespace Ecommerce_API.Data.Concrete
                     {
                         reader.Read();
                         int userId = Convert.ToInt32(reader["User_ID"]);
+                        string role = Convert.ToString(reader["role"]);
                         string name = Convert.ToString(reader["name"]);
                         string email = Convert.ToString(reader["email"]);
-                        string address = Convert.ToString(reader["address"]);
-                        string phone = Convert.ToString(reader["phone"]);
-                        string role = Convert.ToString(reader["role"]);
+                        string userStatus = Convert.ToString(reader["status"]);
                         string passwordHash = Convert.ToString(reader["PasswordHash"]);
                         string passwordSalt = Convert.ToString(reader["PasswordSalt"]);
 
@@ -77,14 +76,17 @@ namespace Ecommerce_API.Data.Concrete
 
                         if (isPasswordMatch)
                         {
-                            return new UserModel { 
+                            if(string.Equals(userStatus, "active", StringComparison.OrdinalIgnoreCase))
+                            {
+                                UpdateUserLastLogin(userId);
+                            }
+
+                            return new UserModel
+                            {
                                 Token = jWTHelper.GenerateToken(name, email, role),
                                 UserId = userId,
-                                Name = name,
-                                Email = email,
-                                Address = address,
-                                Phone = phone,
                                 Role = role,
+                                Status = userStatus,
                             };
                         }
                         else
@@ -98,6 +100,26 @@ namespace Ecommerce_API.Data.Concrete
                     }
                 },
                 new SqlParameter("@email", login.email)
+                );
+            }
+            catch (Exception ex)
+            {
+                Logger.log(ex);
+                throw ex;
+            }
+        }
+
+        private int UpdateUserLastLogin(int userId)
+        {
+            try
+            {
+                string storedProcedure = "UpdateLastLogin";
+                return ExecuteSQL(storedProcedure, cmd =>
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    return cmd.ExecuteNonQuery();
+                },
+                new SqlParameter("@UserId", userId)
                 );
             }
             catch (Exception ex)
