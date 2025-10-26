@@ -1,0 +1,58 @@
+﻿@model List<Ecommerce_Application.Models.ProductModel>
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Category</title>
+    <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            background-color: #FFF7DD;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div id="dynamicHeaderContent">
+        </div>
+    </header>
+    <div class="container p-3" style="margin-top: 70px">
+        <h2>Available Products</h2>
+        @if (Model != null && Model.Count > 0)
+        {
+            <div class="container mt-4">
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                    @foreach (var product in Model)
+                    {
+                        <div class="col">
+                            @Html.Partial("_ProductCard", product)
+                        </div>
+                    }
+
+
+                </div>
+            </div>
+        }
+        else
+        {
+            <h5>No Products Available</h5>
+        }
+
+    </div>
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+    <script src="~/Scripts/jquery-3.7.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+              $.get('@Url.Action("LoadHeader", "Home")', { isCart: false}, function (data) {
+                    $('#dynamicHeaderContent').html(data);
+            });
+    });
+    </script>
+</body>
+</html>

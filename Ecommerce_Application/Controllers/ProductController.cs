@@ -43,7 +43,23 @@ namespace Ecommerce_Application.Controllers
             return View(productDetails);
         }
 
-        public async Task<ActionResult> SeachProduct(string query)
+        public async Task<ActionResult> Search(string query)
+        {
+            try
+            {
+                List<ProductModel> products = new List<ProductModel>();
+                if (!string.IsNullOrEmpty(query))
+                {
+                    products = await productServices.SearchProduct(Request.Cookies["Token"].Value.ToString(), query);
+                }
+                return View(products);
+            } catch (Exception ex) {
+                Debug.WriteLine("Error: " + ex.Message);
+                throw ex;
+            }
+        }
+
+        public async Task<ActionResult> SearchProduct(string query)
         {
             try
             {

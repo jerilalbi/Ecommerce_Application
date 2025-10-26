@@ -111,9 +111,12 @@
                 return;
             }
 
-            $.getJSON("/Product/SeachProduct", { query: query }, function (data) {
-                showSuggestions(data);
-            });
+            const searchPage = `/Product/Search?query=${query}`;
+            window.location.href = searchPage;
+
+            //$.getJSON("/Product/SearchProduct", { query: query }, function (data) {
+            //    showSuggestions(data);
+            //});
         });
 
         $(document).click(function (e) {

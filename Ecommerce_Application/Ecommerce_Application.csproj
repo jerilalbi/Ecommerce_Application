@@ -283,6 +283,7 @@
     <Content Include="Views\Order\_ViewOrdersSec.cshtml" />
     <Content Include="Views\Admin\_Stocks.cshtml" />
     <Content Include="Views\Admin\_Orders.cshtml" />
+    <Content Include="Views\Product\Search.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
